@@ -1,0 +1,470 @@
+missinglevel = function(factor1, factor2){
+  tally = NULL; missing = NULL; missingcycle = NULL
+
+  factor1 = as.character(factor1); factor2 = as.character(factor2)
+
+  for(i in 1:length(factor1)){
+    str = 0
+    for(j in 1:length(factor2)){
+      if(factor1[i] == factor2[j]){
+        tally = c(tally, factor1[i])
+        str = 1
+      }
+    }
+    if(str == 0){
+      missing = c(missing, factor1[i])
+      missingcycle = c(missingcycle, i)
+    }
+  }
+
+  missingfactor2 = which(is.na(factor(factor2, levels = unique(tally))))
+
+  return(list("matching levels" = unique(tally),
+              "non-matching levels" = unique(missing),
+              "non-matching index1" = missingcycle,
+              "non-matching index2" = missingfactor2))
+}
+
+
+MatrixVis = function(prediction = NULL,
+                       target = NULL,
+                       model = NULL,
+                       data = NULL,
+                       by = NULL,
+                       detailed = F,
+                       map = F,
+                       map.data = NULL,
+                       breaks = NULL,
+                       ask = F,
+                       interactive.map = F) {
+
+  if (!is.null(prediction)) {
+    target = as.factor(target)
+    View = as.data.frame(table(target, prediction, dnn = c("Class", "Prediction")))
+
+    table = as.data.frame(levels(target))
+    colnames(table) = "Target"
+
+    for(i in 1:length(levels(target))){
+
+      pos = levels(target)[i]
+      itr.table = matrix(NA, 2, 2)
+      colnames(itr.table) <- rownames(itr.table) <- c("pos", "neg")
+
+      itr.table[1,1] = sum(View[which(View$Class == pos & View$Prediction == pos),3]) # True pos
+      itr.table[1,2] = sum(View[which(View$Class == pos & View$Prediction != pos),3]) # False neg
+      itr.table[2,1] = sum(View[which(View$Class != pos & View$Prediction == pos),3]) # False pos
+      itr.table[2,2] = sum(View[which(View$Class != pos & View$Prediction != pos),3]) # True neg
+
+      TotalPred = sum(itr.table[,1])
+      TrueClass = sum(itr.table[1,])
+      Prevalence = round(TrueClass/length(target),3)
+
+      Specificity = round(itr.table[2,2]/sum(itr.table[2,]),3)
+      Recall = ifelse(TrueClass > 0, round(itr.table[1,1]/TrueClass,3), NA)
+      Precision = ifelse(TotalPred > 0, round(itr.table[1,1]/TotalPred,3), NA)
+      F1 = ifelse(Recall>0 | Precision>0, round((2*Recall*Precision)/(Recall+Precision),3), NA)
+      Accuracy = round((itr.table[1,1]+itr.table[2,2])/length(target),3)
+      MCC = round((itr.table[1,1]*itr.table[2,2]-itr.table[2,1]*itr.table[1,2])/sqrt((itr.table[1,1]+itr.table[2,1])*(itr.table[1,1]*itr.table[1,2])*(itr.table[2,2]+itr.table[2,1])*(itr.table[2,2])+itr.table[1,2]),3)
+
+
+      table$CorrectPred[i] = itr.table[1,1]
+      table$FalseNeg[i] = itr.table[1,2]
+      table$FalsePos[i] = itr.table[2,1]
+      table$Prevalence[i] = Prevalence
+      table$TotalPred[i] = TotalPred
+      table$Accuracy[i] = Accuracy
+      table$Specificity[i] = Specificity
+      table$Recall[i] = Recall
+      table$Precision[i] = Precision
+      table$F1[i] = F1
+      table$MCC[i] = MCC
+
+    }
+
+    BER = sum(1 - table$Accuracy)/nrow(table)
+
+  }
+  else{
+    target = as.factor(target)
+    if (is.character(by)) {
+      levels = unique(data[, by])
+    } else{
+      if (is.factor(by)) {
+        levels = levels(by)
+      } else{
+        levels = unique(by)
+      }
+    }
+
+    table.res = as.data.frame(levels)
+    table.list = list(NULL)
+
+    for (j in 1:length(levels)) {
+      if (is.character(by)) {
+        subset = data[which(data[, by] == levels[j]), ]
+        pred = predict(model, subset)
+        target.sub = target[which(data[, by] == levels[j])]
+      } else{
+        subset = data[which(by == levels[j]), ]
+        pred = predict(model, subset)
+        target.sub = target[which(by == levels[j])]
+      }
+
+      table.sub = as.data.frame(levels(target.sub))
+      colnames(table.sub) = "Target"
+
+      View = as.data.frame(table(target.sub, pred, dnn = c("Class", "Prediction")))
+
+      for(i in 1:length(levels(target.sub))){
+
+        pos = levels(target.sub)[i]
+        itr.table = matrix(NA, 2, 2)
+        colnames(itr.table) <- rownames(itr.table) <- c("pos", "neg")
+
+        itr.table[1,1] = sum(View[which(View$Class == pos & View$Prediction == pos),3]) # True pos
+        itr.table[1,2] = sum(View[which(View$Class == pos & View$Prediction != pos),3]) # False neg
+        itr.table[2,1] = sum(View[which(View$Class != pos & View$Prediction == pos),3]) # False pos
+        itr.table[2,2] = sum(View[which(View$Class != pos & View$Prediction != pos),3]) # True neg
+
+        TotalPred = sum(itr.table[,1])
+        TrueClass = sum(itr.table[1,])
+        Prevalence = round(TrueClass/length(target.sub),3)
+
+        Specificity = round(itr.table[2,2]/sum(itr.table[2,]),3)
+        Recall = ifelse(TrueClass > 0, round(itr.table[1,1]/TrueClass,3), NA)
+        Precision = ifelse(TotalPred > 0, round(itr.table[1,1]/TotalPred,3), NA)
+        F1 = ifelse(Recall>0 | Precision>0, round((2*Recall*Precision)/(Recall+Precision),3), NA)
+        Accuracy = round((itr.table[1,1]+itr.table[2,2])/sum(sum(itr.table[1,]), sum(itr.table[2,])),3)
+        MCC = round((itr.table[1,1]*itr.table[2,2]-itr.table[2,1]*itr.table[1,2])/sqrt((itr.table[1,1]+itr.table[2,1])*(itr.table[1,1]+itr.table[1,2])*(itr.table[2,2]+itr.table[2,1])*(itr.table[2,2])+itr.table[1,2]),3)
+
+        table.sub$CorrectPred[i] = itr.table[1,1]
+        table.sub$FalseNeg[i] = itr.table[1,2]
+        table.sub$FalsePos[i] = itr.table[2,1]
+        table.sub$Prevalence[i] = Prevalence
+        table.sub$TotalPred[i] = TotalPred
+        table.sub$Accuracy[i] = Accuracy
+        table.sub$Specificity[i] = Specificity
+        table.sub$Recall[i] = Recall
+        table.sub$Precision[i] = Precision
+        table.sub$F1[i] = F1
+        table.sub$MCC[i] = MCC
+
+        table.sub$by = levels[j]
+
+        table.list[[j]] = table.sub[, -ncol(table.sub)]
+
+      }
+
+      BER = sum(1 - table.sub$Accuracy)/nrow(table.sub)
+
+      table.res$CorrectPredTotal[j] = sum(table.sub$CorrectPred) # Acertos
+      table.res$IncorrectPredTotal[j] = sum(table.sub$FalseNeg)
+
+      table.res$n[j] = sum(table.sub$TotalPred)
+
+      table.res$MeanRecall[j] = round(mean(table.sub$Recall, na.rm = T), 3)
+      table.res$MeanPrecision[j] = round(mean(table.sub$Precision, na.rm = T), 3)
+      table.res$MeanSpecificity[j] = round(mean(table.sub$Specificity, na.rm = T), 3)
+      table.res$MeanF1[j] = round(mean(table.sub$F1, na.rm = T), 3)
+      table.res$MeanMCC[j] = ifelse(!is.na(table.sub$MCC), round(mean(table.sub$MCC, na.rm = T), 3), NA)
+
+      table.res$BER[j] = BER
+
+    }
+
+    names(table.list) = as.character(levels)
+
+  }
+
+  if (map) {
+
+    graphics::par(ask = F)
+    if (ask) {
+      graphics::par(ask = T)
+    }
+
+    map.data = as.data.frame(map.data)
+
+    if (!is.null(by)) {
+
+      colnames(table.res)[1] = colnames(map.data)[1]
+      map.data = merge(table.res, map.data)
+      map.data = sf::st_as_sf(map.data)
+
+      base = tmap::tm_shape(map.data)
+      n = base + tmap::tm_fill(col = "n", breaks = breaks)
+      correctpredictions = base + tmap::tm_fill(col = "CorrectPredTotal", breaks = breaks)
+      incorrectpredictions = base + tmap::tm_fill(col = "IncorrectPredTotal", breaks = breaks)
+      recall = base + tmap::tm_fill(col = "MeanRecall")
+      precision = base + tmap::tm_fill(col = "MeanPrecision")
+      specificity = base + tmap::tm_fill(col = "MeanSpecificity")
+      F1 = base + tmap::tm_fill(col = "MeanF1")
+      MCC = base + tmap::tm_fill(col = "MeanMCC")
+      BER = base + tmap::tm_fill(col = "BER")
+
+    } else{
+
+      colnames(table)[1] = colnames(map.data)[1]
+      map.data = merge(table, map.data, by = intersect(rownames(table), map.data[,1]))
+      map.data = sf::st_as_sf(map.data)
+
+      base = tmap::tm_shape(map.data)
+
+      prevalence = base + tmap::tm_fill(col = "Prevalence")
+      totalpredictions = base + tmap::tm_fill(col = "TotalPred", breaks = breaks)
+      correctpredictions = base + tmap::tm_fill(col = "CorrectPred", breaks = breaks)
+      recall = base + tmap::tm_fill(col = "Recall")
+      precision = base + tmap::tm_fill(col = "Precision")
+      specificity = base + tmap::tm_fill(col = "Specificity")
+      accuracy = base + tmap::tm_fill(col = "Accuracy")
+      f1 = base + tmap::tm_fill(col = "F1")
+      mcc  =base + tmap::tm_fill(col = "MCC")
+
+    }
+
+    if (interactive.map) {
+      if (is.null(by)) {
+        trueclass = tmap::tmap_leaflet(trueclass)
+        totalpredictions = tmap::tmap_leaflet(totalpredictions)
+        correctpredictions = tmap::tmap_leaflet(correctpredictions)
+        recall = tmap::tmap_leaflet(recall)
+        precision = tmap::tmap_leaflet(precision)
+        specificity = tmap::tmap_leaflet(specificity)
+        accuracy = tmap::tmap_leaflet(accuracy)
+        f1 = tmap::tmap_leaflet(f1)
+        mcc = tmap::tmap_leaflet(mcc)
+
+      } else{
+        n = tmap::tmap_leaflet(n)
+        correctpredictions = tmap::tmap_leaflet(correctpredictions)
+        incorrectpredictions = tmap::tmap_leaflet(incorrectpredictions)
+        recall = tmap::tmap_leaflet(recall)
+        precision = tmap::tmap_leaflet(precision)
+        specificity = tmap::tmap_leaflet(specificity)
+        F1 = tmap::tmap_leaflet(F1)
+        MCC =  tmap::tmap_leaflet(MCC)
+        BER = tmap::tmap_leaflet(BER)
+      }
+    }
+    if (!is.null(by)) {
+      if (detailed) {
+        return(
+          list(
+            "Tablelist" = table.list,
+            "ShortTable" = table.res,
+            "MeanBER" = round(mean(table.res$BER), 3),
+            "plots" = list(
+              "n" = list(n),
+              "CorrectPredictions" = list(correctpredictions),
+              "IncorrectPredictions" = list(incorrectpredictions),
+              "MeanRecall" = list(recall),
+              "MeanPrecision" = list(precision),
+              "MeanSpecificity" = list(specificity),
+              "MeanF1" = list(F1),
+              "MeanMCC" = list(MCC),
+              "BER" = list(BER)
+            )
+          )
+        )
+      } else{
+        return(list(
+          "ShortTable" = table.res,
+          "MeanBER" = round(mean(table.res$BER), 3),
+          "plots" = list(
+            "n" = list(n),
+            "CorrectPredictions" = list(correctpredictions),
+            "IncorrectPredictions" = list(incorrectpredictions),
+            "MeanRecall" = list(recall),
+            "MeanPrecision" = list(precision),
+            "MeanSpecificity" = list(specificity),
+            "MeanF1" = list(F1),
+            "MeanMCC" = list(MCC),
+            "BER" = list(BER)
+          )
+        ))
+      }
+
+    } else{
+      return(list(
+        "table" = table,
+        "BER" = BER,
+        "plots" = list(
+          "TrueClass" = list(trueclass),
+          "TotalPredictions" = list(totalpredictions),
+          "CorrectPredictions" = list(correctpredictions),
+          "Recall" = list(recall),
+          "Precision" = list(precision),
+          "Specificity" = list(specificity),
+          "Accuracy" = list(accuracy),
+          "F1" = list(f1),
+          "MCC" = list(mcc)
+        )
+      ))
+    }
+    graphics::par(ask = F)
+
+  }
+  else{
+    if (!is.null(by)) {
+      if (detailed) {
+        return(list(
+          "Fulllist" = table.list,
+          "ShortTable" = table.res,
+          "MeanBER" = round(mean(table.res$BER), 3)
+        ))
+      } else{
+        return(list("ShortTable" = table.res,
+                    "MeanBER" = round(mean(table.res$BER), 3)))
+      }
+
+    } else{
+      return(list("table" = table, "BER" = BER))
+    }
+  }
+}
+
+
+RegViz = function(model = NULL,
+                  target = NULL,
+                  by = NULL,
+                  data = NULL,
+                  missing.level = NULL,
+                  map = F,
+                  map.data = NULL,
+                  interactive = F,
+                  ask = T) {
+
+  cols = grep(by, colnames(data))
+
+  by.cols = data[, cols]
+
+  if (!is.factor(by.cols)) {
+    colnames(by.cols) = gsub(by, "", colnames(by.cols))
+    colnames(by.cols) = gsub("`", "", colnames(by.cols))
+    # Nicknamed annoying matrix bs(courtesy of ridge/lasso/elastic net)
+    # This entire block of code just translates dummy/one hot encoding back to one column
+    by = NULL                   # Just to facilitate sub-setting later
+
+    for (i in 1:dim(by.cols)[1]) {
+      for (j in 1:dim(by.cols)[2]) {
+        if (by.cols[i, j] == 1) {
+          by$levels[i] = colnames(by.cols)[j]
+        }
+      }
+    }
+
+    by = as.data.frame(by)
+
+    if (!is.null(missing.level)) {
+      by[which(is.na(by$levels)), 1] = missing.level
+    } else{
+      if(sum(is.na(by)) > 0){
+        by[which(is.na(by$levels)), 1] = "ZZZZZ"
+      }
+    }
+
+  } else{
+    by = as.data.frame(by.cols)
+    colnames(by) = "levels"
+  }
+
+  table = as.data.frame(unique(by$levels))
+  names(table) = "levels"
+
+  data = as.data.frame(data)
+  used = NULL
+  for (i in 1:(length(unique(by$levels))-1)) {
+    if(length(cols)>1){
+      col = data[,grep(table$levels[i], colnames(data[,cols]))]
+      rows = which(col == 1)
+      if(length(rows) == 0){
+        rows = which(rowMeans(data[,cols]) == 0)
+      }
+      subset = as.matrix(data[rows,])
+      pred = predict(model, subset)
+      target.sub = target[rows]
+
+    } else{
+      subset = data[which(data[, cols] == unique(by$levels)[i] ), ] #TL;DR: No dummy variable
+      pred = predict(model, subset)                                      # No adaptations for them
+      target.sub = target[which(data[, cols] == unique(by$levels)[i])]
+    }
+
+    table$n[i] = length(pred)
+    table$RMSE[i] = round(sqrt(mean((target.sub - pred) ^ 2)), 3)
+    table$real.mean[i] = round(mean(target.sub), 2)
+    table$real.median[i] = round(stats::median(target.sub), 2)
+    table$real.IQR[i] = round(stats::quantile(target.sub, 0.75) - stats::quantile(target.sub, 0.25), 2)
+    table$pred.mean[i] = round(mean(pred), 2)
+    table$pred.median[i] = round(stats::median(pred), 2)
+    table$pred.IQR[i] = round(stats::quantile(pred, 0.75) - stats::quantile(pred, 0.25), 2)
+
+    if(length(cols)>1){
+      used = c(used, rows)
+    }else{
+      used = c(used, which(data[, cols] == unique(by$levels)[i]))
+    }
+
+  }
+  if(length(used) != length(target)){
+    if(length(cols)>1){
+      subset = as.matrix(data[-used, ])
+    }else{
+      subset = data[-used, ]
+    }
+
+    pred = predict(model, subset)
+    target.sub = target[-used]
+
+    table$n[dim(table)[1]] = length(pred)
+    table$RMSE[dim(table)[1]] = round(sqrt(mean((target.sub - pred) ^ 2)), 3)
+    table$real.mean[dim(table)[1]] = round(mean(target.sub), 2)
+    table$real.median[dim(table)[1]] = round(stats::median(target.sub), 2)
+    table$real.IQR[dim(table)[1]] = round(stats::quantile(target.sub, 0.75) - stats::quantile(target.sub, 0.25), 2)
+    table$pred.mean[dim(table)[1]] = round(mean(pred), 2)
+    table$pred.median[dim(table)[1]] = round(stats::median(pred), 2)
+    table$pred.IQR[dim(table)[1]] = round(stats::quantile(pred, 0.75) - stats::quantile(pred, 0.25), 2)
+  }
+
+  if (map) {
+
+    graphics::par(ask = F)
+    if (ask) {
+      graphics::par(ask = T)
+    }
+
+    map.data = as.data.frame(map.data)
+    colnames(table)[1] = colnames(map.data)[1]
+    map.data = merge(table, map.data)
+    map.data = sf::st_as_sf(map.data)
+
+    base = tmap::tm_shape(map.data)
+    n = base + tmap::tm_fill(col = "n")
+    RMSEA = base + tmap::tm_fill(col = "RMSE")
+    RealMean = base + tmap::tm_fill(col = "real.mean")
+    PredMean = base + tmap::tm_fill(col = "pred.mean")
+
+    if (interactive) {
+      n = tmap::tmap_leaflet(n)
+      RMSEA = tmap::tmap_leaflet(RMSEA)
+      RealMean = tmap::tmap_leaflet(RealMean)
+      PredMean = tmap::tmap_leaflet(PredMean)
+    }
+
+    return(list(
+      "table" = table,
+      "plots" = list(
+        "n" = n,
+        "RMSEA" = RMSEA,
+        "RealMean" = RealMean,
+        "PredMean" = PredMean
+      )
+    ))
+  }
+
+  else{
+    return(table)
+  }
+}
+
