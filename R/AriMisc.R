@@ -27,16 +27,19 @@ missinglevel = function(factor1, factor2){
 
 
 MatrixVis = function(prediction = NULL,
-                       target = NULL,
-                       model = NULL,
-                       data = NULL,
-                       by = NULL,
-                       detailed = F,
-                       map = F,
-                       map.data = NULL,
-                       breaks = NULL,
-                       ask = F,
-                       interactive.map = F) {
+                     target = NULL,
+                     model = NULL,
+                     data = NULL,
+                     by = NULL,
+                     quantiles = NULL,
+                     breaks.num = NULL,
+                     ext.summary = F,
+                     detailed = F,
+                     map = F,
+                     map.data = NULL,
+                     breaks = NULL,
+                     ask = F,
+                     interactive.map = F) {
 
   if (!is.null(prediction)) {
     target = as.factor(target)
@@ -45,32 +48,35 @@ MatrixVis = function(prediction = NULL,
     table = as.data.frame(levels(target))
     colnames(table) = "Target"
 
-    for(i in 1:length(levels(target))){
-
+    for (i in 1:length(levels(target))) {
       pos = levels(target)[i]
       itr.table = matrix(NA, 2, 2)
       colnames(itr.table) <- rownames(itr.table) <- c("pos", "neg")
 
-      itr.table[1,1] = sum(View[which(View$Class == pos & View$Prediction == pos),3]) # True pos
-      itr.table[1,2] = sum(View[which(View$Class == pos & View$Prediction != pos),3]) # False neg
-      itr.table[2,1] = sum(View[which(View$Class != pos & View$Prediction == pos),3]) # False pos
-      itr.table[2,2] = sum(View[which(View$Class != pos & View$Prediction != pos),3]) # True neg
+      itr.table[1, 1] = sum(View[which(View$Class == pos &
+                                         View$Prediction == pos), 3]) # True pos
+      itr.table[1, 2] = sum(View[which(View$Class == pos &
+                                         View$Prediction != pos), 3]) # False neg
+      itr.table[2, 1] = sum(View[which(View$Class != pos &
+                                         View$Prediction == pos), 3]) # False pos
+      itr.table[2, 2] = sum(View[which(View$Class != pos &
+                                         View$Prediction != pos), 3]) # True neg
 
-      TotalPred = sum(itr.table[,1])
-      TrueClass = sum(itr.table[1,])
-      Prevalence = round(TrueClass/length(target),3)
+      TotalPred = sum(itr.table[, 1])
+      TrueClass = sum(itr.table[1, ])
+      Prevalence = round(TrueClass / length(target), 3)
 
-      Specificity = round(itr.table[2,2]/sum(itr.table[2,]),3)
-      Recall = ifelse(TrueClass > 0, round(itr.table[1,1]/TrueClass,3), NA)
-      Precision = ifelse(TotalPred > 0, round(itr.table[1,1]/TotalPred,3), NA)
-      F1 = ifelse(Recall>0 | Precision>0, round((2*Recall*Precision)/(Recall+Precision),3), NA)
-      Accuracy = round((itr.table[1,1]+itr.table[2,2])/length(target),3)
-      MCC = round((itr.table[1,1]*itr.table[2,2]-itr.table[2,1]*itr.table[1,2])/sqrt((itr.table[1,1]+itr.table[2,1])*(itr.table[1,1]*itr.table[1,2])*(itr.table[2,2]+itr.table[2,1])*(itr.table[2,2])+itr.table[1,2]),3)
+      Specificity = round(itr.table[2, 2] / sum(itr.table[2, ]), 3)
+      Recall = ifelse(TrueClass > 0, round(itr.table[1, 1] / TrueClass, 3), NA)
+      Precision = ifelse(TotalPred > 0, round(itr.table[1, 1] / TotalPred, 3), NA)
+      F1 = ifelse(Recall > 0 |
+                    Precision > 0, round((2 * Recall * Precision) / (Recall + Precision), 3), NA)
+      Accuracy = round((itr.table[1, 1] + itr.table[2, 2]) / length(target), 3)
 
 
-      table$CorrectPred[i] = itr.table[1,1]
-      table$FalseNeg[i] = itr.table[1,2]
-      table$FalsePos[i] = itr.table[2,1]
+      table$CorrectPred[i] = itr.table[1, 1]
+      table$FalseNeg[i] = itr.table[1, 2]
+      table$FalsePos[i] = itr.table[2, 1]
       table$Prevalence[i] = Prevalence
       table$TotalPred[i] = TotalPred
       table$Accuracy[i] = Accuracy
@@ -78,22 +84,80 @@ MatrixVis = function(prediction = NULL,
       table$Recall[i] = Recall
       table$Precision[i] = Precision
       table$F1[i] = F1
-      table$MCC[i] = MCC
 
     }
 
-    BER = sum(1 - table$Accuracy)/nrow(table)
+    BER = sum(1 - table$Accuracy) / nrow(table)
 
   }
   else{
     target = as.factor(target)
+    if (length(by) == 1) {
+      by = as.character(by)
+      by = as.factor(data[, by])
+    }
     if (is.character(by)) {
-      levels = unique(data[, by])
-    } else{
-      if (is.factor(by)) {
+      by = as.factor(by)
+      levels = levels(by)
+    }
+    if (is.factor(by)) {
+      levels = levels(by)
+    }
+    if (is.numeric(by)) {
+      if (!is.null(quantiles) & !is.null(breaks.num)) {
+        stop("Either quantiles or breaks, not both")
+      }
+
+      if (!is.null(breaks.num)) {
+
+        str.by = by
+        quant.levels = NULL
+        str.by[which(by < breaks.num[1])] = paste("<", as.character(breaks.num)[1], sep = "")
+        quant.levels[1] = paste("<", as.character(breaks.num)[1], sep = "")
+
+        for (i in 2:length(breaks.num)) {
+          str.by[which(by < breaks.num[i] &
+                         by > breaks.num[i - 1])] = paste(as.character(breaks.num[i - 1]),
+                                                          as.character(breaks.num[i], sep = "-"))
+          quant.levels[i] = paste(as.character(breaks.num[i - 1]),
+                                  as.character(breaks.num[i], sep = "-"))
+
+        }
+
+        str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+        quant.levels[(length(breaks.num + 1))] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+
+        by = factor(str.by, levels = quant.levels)
         levels = levels(by)
-      } else{
-        levels = unique(by)
+
+      } else {
+        if (!is.null(quantiles)) {
+          quantiles = as.numeric(quantiles)
+          quantiles[order(quantiles, decreasing = F)]
+        } else{
+          quantiles = c(0.25,0.5,0.75)
+        }
+
+        str.by = by
+        quant.levels = NULL
+
+        str.by[which(by <= quantile(by, quantiles[1]))] = paste("<Q", quantiles[1], sep = "")
+        quant.levels[1] = paste("<Q", quantiles[1], sep = "")
+        for (i in 2:length(quantiles)) {
+          str.by[which(by <= quantile(by, quantiles[i]) &
+                         by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+                                                                                              1], sep = ""),
+                                                                       paste("Q", quantiles[i], sep = ""),
+                                                                       sep = "-")
+
+          quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
+        }
+        str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+        quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+        by = factor(str.by, levels = quant.levels)
+        levels = levels(by)
+
       }
     }
 
@@ -101,46 +165,45 @@ MatrixVis = function(prediction = NULL,
     table.list = list(NULL)
 
     for (j in 1:length(levels)) {
-      if (is.character(by)) {
-        subset = data[which(data[, by] == levels[j]), ]
-        pred = predict(model, subset)
-        target.sub = target[which(data[, by] == levels[j])]
-      } else{
-        subset = data[which(by == levels[j]), ]
-        pred = predict(model, subset)
-        target.sub = target[which(by == levels[j])]
-      }
+      subset = data[which(by == levels[j]),]
+      pred = predict(model, subset)
+      target.sub = target[which(by == levels[j])]
 
       table.sub = as.data.frame(levels(target.sub))
       colnames(table.sub) = "Target"
 
       View = as.data.frame(table(target.sub, pred, dnn = c("Class", "Prediction")))
 
-      for(i in 1:length(levels(target.sub))){
-
+      for (i in 1:length(levels(target.sub))) {
         pos = levels(target.sub)[i]
         itr.table = matrix(NA, 2, 2)
-        colnames(itr.table) <- rownames(itr.table) <- c("pos", "neg")
+        colnames(itr.table) <-
+          rownames(itr.table) <- c("pos", "neg")
 
-        itr.table[1,1] = sum(View[which(View$Class == pos & View$Prediction == pos),3]) # True pos
-        itr.table[1,2] = sum(View[which(View$Class == pos & View$Prediction != pos),3]) # False neg
-        itr.table[2,1] = sum(View[which(View$Class != pos & View$Prediction == pos),3]) # False pos
-        itr.table[2,2] = sum(View[which(View$Class != pos & View$Prediction != pos),3]) # True neg
+        itr.table[1, 1] = sum(View[which(View$Class == pos &
+                                           View$Prediction == pos), 3]) # True pos
+        itr.table[1, 2] = sum(View[which(View$Class == pos &
+                                           View$Prediction != pos), 3]) # False neg
+        itr.table[2, 1] = sum(View[which(View$Class != pos &
+                                           View$Prediction == pos), 3]) # False pos
+        itr.table[2, 2] = sum(View[which(View$Class != pos &
+                                           View$Prediction != pos), 3]) # True neg
 
-        TotalPred = sum(itr.table[,1])
-        TrueClass = sum(itr.table[1,])
-        Prevalence = round(TrueClass/length(target.sub),3)
+        TotalPred = sum(itr.table[, 1])
+        TrueClass = sum(itr.table[1, ])
+        Prevalence = round(TrueClass / length(target.sub), 3)
 
-        Specificity = round(itr.table[2,2]/sum(itr.table[2,]),3)
-        Recall = ifelse(TrueClass > 0, round(itr.table[1,1]/TrueClass,3), NA)
-        Precision = ifelse(TotalPred > 0, round(itr.table[1,1]/TotalPred,3), NA)
-        F1 = ifelse(Recall>0 | Precision>0, round((2*Recall*Precision)/(Recall+Precision),3), NA)
-        Accuracy = round((itr.table[1,1]+itr.table[2,2])/sum(sum(itr.table[1,]), sum(itr.table[2,])),3)
-        MCC = round((itr.table[1,1]*itr.table[2,2]-itr.table[2,1]*itr.table[1,2])/sqrt((itr.table[1,1]+itr.table[2,1])*(itr.table[1,1]+itr.table[1,2])*(itr.table[2,2]+itr.table[2,1])*(itr.table[2,2])+itr.table[1,2]),3)
+        Specificity = round(itr.table[2, 2] / sum(itr.table[2, ]), 3)
+        Recall = ifelse(TrueClass > 0, round(itr.table[1, 1] / TrueClass, 3), NA)
+        Precision = ifelse(TotalPred > 0, round(itr.table[1, 1] / TotalPred, 3), NA)
+        F1 = ifelse(Recall > 0 |
+                      Precision > 0, round((2 * Recall * Precision) / (Recall + Precision), 3), NA)
+        Accuracy = round((itr.table[1, 1] + itr.table[2, 2]) / sum(sum(itr.table[1, ]), sum(itr.table[2, ])), 3)
 
-        table.sub$CorrectPred[i] = itr.table[1,1]
-        table.sub$FalseNeg[i] = itr.table[1,2]
-        table.sub$FalsePos[i] = itr.table[2,1]
+
+        table.sub$CorrectPred[i] = itr.table[1, 1]
+        table.sub$FalseNeg[i] = itr.table[1, 2]
+        table.sub$FalsePos[i] = itr.table[2, 1]
         table.sub$Prevalence[i] = Prevalence
         table.sub$TotalPred[i] = TotalPred
         table.sub$Accuracy[i] = Accuracy
@@ -148,28 +211,50 @@ MatrixVis = function(prediction = NULL,
         table.sub$Recall[i] = Recall
         table.sub$Precision[i] = Precision
         table.sub$F1[i] = F1
-        table.sub$MCC[i] = MCC
 
         table.sub$by = levels[j]
 
-        table.list[[j]] = table.sub[, -ncol(table.sub)]
+        table.list[[j]] = table.sub[,-ncol(table.sub)]
 
       }
 
-      BER = sum(1 - table.sub$Accuracy)/nrow(table.sub)
+      BER = sum(1 - table.sub$Accuracy) / nrow(table.sub)
 
       table.res$CorrectPredTotal[j] = sum(table.sub$CorrectPred) # Acertos
       table.res$IncorrectPredTotal[j] = sum(table.sub$FalseNeg)
 
       table.res$n[j] = sum(table.sub$TotalPred)
 
-      table.res$MeanRecall[j] = round(mean(table.sub$Recall, na.rm = T), 3)
-      table.res$MeanPrecision[j] = round(mean(table.sub$Precision, na.rm = T), 3)
-      table.res$MeanSpecificity[j] = round(mean(table.sub$Specificity, na.rm = T), 3)
-      table.res$MeanF1[j] = round(mean(table.sub$F1, na.rm = T), 3)
-      table.res$MeanMCC[j] = ifelse(!is.na(table.sub$MCC), round(mean(table.sub$MCC, na.rm = T), 3), NA)
+      if(ext.summary){
 
-      table.res$BER[j] = BER
+        for(k in 1:length(levels(target.sub))){
+          table.res[j, paste("Prevalence", levels(target.sub)[k], sep = "_")] = table.sub$Prevalence[k]
+        }
+
+        table.res$MeanRecall[j] = round(mean(table.sub$Recall, na.rm = T), 3)
+        table.res$RecallRange[j] = paste(round(min(table.sub$Recall, na.rm = T),2), round(max(table.sub$Recall, na.rm = T),2), sep = "-")
+
+        table.res$MeanPrecision[j] = round(mean(table.sub$Precision, na.rm = T), 3)
+        table.res$PrecisionRange[j] = paste(round(min(table.sub$Precision, na.rm = T),2), round(max(table.sub$Precision, na.rm = T),2), sep = "-")
+
+        table.res$MeanSpecificity[j] = round(mean(table.sub$Specificity, na.rm = T), 3)
+        table.res$SpecificityRange[j] = paste(round(min(table.sub$Specificity, na.rm = T),2), round(max(table.sub$Specificity, na.rm = T),2), sep = "-")
+
+        table.res$MeanF1[j] = round(mean(table.sub$F1, na.rm = T), 3)
+        table.res$F1Range[j] = paste(round(min(table.sub$F1, na.rm = T),2), round(max(table.sub$F1, na.rm = T),2), sep = "-")
+
+        table.res$BER[j] = BER
+
+      }else{
+
+        table.res$MeanRecall[j] = round(mean(table.sub$Recall, na.rm = T), 3)
+        table.res$MeanPrecision[j] = round(mean(table.sub$Precision, na.rm = T), 3)
+        table.res$MeanSpecificity[j] = round(mean(table.sub$Specificity, na.rm = T), 3)
+        table.res$MeanF1[j] = round(mean(table.sub$F1, na.rm = T), 3)
+
+        table.res$BER[j] = BER
+
+      }
 
     }
 
@@ -200,13 +285,11 @@ MatrixVis = function(prediction = NULL,
       precision = base + tmap::tm_fill(col = "MeanPrecision")
       specificity = base + tmap::tm_fill(col = "MeanSpecificity")
       F1 = base + tmap::tm_fill(col = "MeanF1")
-      MCC = base + tmap::tm_fill(col = "MeanMCC")
       BER = base + tmap::tm_fill(col = "BER")
 
     } else{
-
       colnames(table)[1] = colnames(map.data)[1]
-      map.data = merge(table, map.data, by = intersect(rownames(table), map.data[,1]))
+      map.data = merge(table, map.data, by = intersect(rownames(table), map.data[, 1]))
       map.data = sf::st_as_sf(map.data)
 
       base = tmap::tm_shape(map.data)
@@ -219,7 +302,6 @@ MatrixVis = function(prediction = NULL,
       specificity = base + tmap::tm_fill(col = "Specificity")
       accuracy = base + tmap::tm_fill(col = "Accuracy")
       f1 = base + tmap::tm_fill(col = "F1")
-      mcc  =base + tmap::tm_fill(col = "MCC")
 
     }
 
@@ -233,7 +315,6 @@ MatrixVis = function(prediction = NULL,
         specificity = tmap::tmap_leaflet(specificity)
         accuracy = tmap::tmap_leaflet(accuracy)
         f1 = tmap::tmap_leaflet(f1)
-        mcc = tmap::tmap_leaflet(mcc)
 
       } else{
         n = tmap::tmap_leaflet(n)
@@ -243,7 +324,6 @@ MatrixVis = function(prediction = NULL,
         precision = tmap::tmap_leaflet(precision)
         specificity = tmap::tmap_leaflet(specificity)
         F1 = tmap::tmap_leaflet(F1)
-        MCC =  tmap::tmap_leaflet(MCC)
         BER = tmap::tmap_leaflet(BER)
       }
     }
@@ -262,7 +342,6 @@ MatrixVis = function(prediction = NULL,
               "MeanPrecision" = list(precision),
               "MeanSpecificity" = list(specificity),
               "MeanF1" = list(F1),
-              "MeanMCC" = list(MCC),
               "BER" = list(BER)
             )
           )
@@ -279,7 +358,6 @@ MatrixVis = function(prediction = NULL,
             "MeanPrecision" = list(precision),
             "MeanSpecificity" = list(specificity),
             "MeanF1" = list(F1),
-            "MeanMCC" = list(MCC),
             "BER" = list(BER)
           )
         ))
@@ -297,8 +375,7 @@ MatrixVis = function(prediction = NULL,
           "Precision" = list(precision),
           "Specificity" = list(specificity),
           "Accuracy" = list(accuracy),
-          "F1" = list(f1),
-          "MCC" = list(mcc)
+          "F1" = list(f1)
         )
       ))
     }
@@ -314,8 +391,10 @@ MatrixVis = function(prediction = NULL,
           "MeanBER" = round(mean(table.res$BER), 3)
         ))
       } else{
-        return(list("ShortTable" = table.res,
-                    "MeanBER" = round(mean(table.res$BER), 3)))
+        return(list(
+          "ShortTable" = table.res,
+          "MeanBER" = round(mean(table.res$BER), 3)
+        ))
       }
 
     } else{
