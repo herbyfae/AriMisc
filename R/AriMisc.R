@@ -41,7 +41,11 @@ MatrixVis = function(prediction = NULL,
                      ask = F,
                      interactive.map = F) {
 
-  if (!is.null(prediction)) {
+  if (is.null(by)) {
+    if(is.null(target)){
+      stop("No reference to compare the predictions to")
+    }
+
     target = as.factor(target)
     View = as.data.frame(table(target, prediction, dnn = c("Class", "Prediction")))
 
@@ -112,20 +116,20 @@ MatrixVis = function(prediction = NULL,
 
         str.by = by
         quant.levels = NULL
-        str.by[which(by < breaks.num[1])] = paste("<", as.character(breaks.num)[1], sep = "")
-        quant.levels[1] = paste("<", as.character(breaks.num)[1], sep = "")
+        str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")
+        quant.levels[1] = paste("<=", as.character(breaks.num)[1], sep = "")
 
         for (i in 2:length(breaks.num)) {
-          str.by[which(by < breaks.num[i] &
-                         by > breaks.num[i - 1])] = paste(as.character(breaks.num[i - 1]),
-                                                          as.character(breaks.num[i], sep = "-"))
-          quant.levels[i] = paste(as.character(breaks.num[i - 1]),
-                                  as.character(breaks.num[i], sep = "-"))
+          str.by[which(by <= breaks.num[i] &
+                         by > breaks.num[i - 1])] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                                                        as.character(breaks.num[i], sep = "")))
+          quant.levels[i] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                                as.character(breaks.num[i], sep = "")))
 
         }
 
         str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
-        quant.levels[(length(breaks.num + 1))] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+        quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
 
         by = factor(str.by, levels = quant.levels)
         levels = levels(by)
@@ -141,8 +145,8 @@ MatrixVis = function(prediction = NULL,
         str.by = by
         quant.levels = NULL
 
-        str.by[which(by <= quantile(by, quantiles[1]))] = paste("<Q", quantiles[1], sep = "")
-        quant.levels[1] = paste("<Q", quantiles[1], sep = "")
+        str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+        quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
         for (i in 2:length(quantiles)) {
           str.by[which(by <= quantile(by, quantiles[i]) &
                          by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
@@ -220,7 +224,7 @@ MatrixVis = function(prediction = NULL,
 
       BER = sum(1 - table.sub$Accuracy) / nrow(table.sub)
 
-      table.res$CorrectPredTotal[j] = sum(table.sub$CorrectPred) # Acertos
+      table.res$CorrectPredTotal[j] = sum(table.sub$CorrectPred)
       table.res$IncorrectPredTotal[j] = sum(table.sub$FalseNeg)
 
       table.res$n[j] = sum(table.sub$TotalPred)
@@ -404,73 +408,120 @@ MatrixVis = function(prediction = NULL,
 }
 
 
-RegViz = function(model = NULL,
+RegVis = function(model = NULL,
                   target = NULL,
-                  by = NULL,
                   data = NULL,
-                  missing.level = NULL,
+                  by = NULL,
+                  quantiles = NULL,
+                  breaks.num = NULL,
                   map = F,
                   map.data = NULL,
-                  interactive = F,
+                  interactive.map = F,
                   ask = T) {
 
-  cols = grep(by, colnames(data))
-
-  by.cols = data[, cols]
-
-  if (!is.factor(by.cols)) {
-    colnames(by.cols) = gsub(by, "", colnames(by.cols))
-    colnames(by.cols) = gsub("`", "", colnames(by.cols))
-    # Nicknamed annoying matrix bs(courtesy of ridge/lasso/elastic net)
-    # This entire block of code just translates dummy/one hot encoding back to one column
-    by = NULL                   # Just to facilitate sub-setting later
-
-    for (i in 1:dim(by.cols)[1]) {
-      for (j in 1:dim(by.cols)[2]) {
-        if (by.cols[i, j] == 1) {
-          by$levels[i] = colnames(by.cols)[j]
-        }
-      }
-    }
-
-    by = as.data.frame(by)
-
-    if (!is.null(missing.level)) {
-      by[which(is.na(by$levels)), 1] = missing.level
-    } else{
-      if(sum(is.na(by)) > 0){
-        by[which(is.na(by$levels)), 1] = "ZZZZZ"
-      }
-    }
-
-  } else{
-    by = as.data.frame(by.cols)
-    colnames(by) = "levels"
+  if(is.null(model)){
+    stop("What is this supposed to do without a model?")
+  }
+  if(is.null(target)){
+    stop("Not good enough at this to extract the target from the model")
+  }
+  if(is.null(by)){
+    summ = summary(model)
+    return(summ)
+  }
+  if(is.null(data)){
+    stop("How would I create breakpoints in the data without it?")
   }
 
-  table = as.data.frame(unique(by$levels))
+  if (length(by) == 1) {
+    by = as.character(by)
+    by = as.factor(data[, by])
+  }
+  if (is.character(by)) {
+    by = as.factor(by)
+    levels = levels(by)
+  }
+  if (is.factor(by)) {
+    levels = levels(by)
+  }
+  if (is.numeric(by)) {
+    if (!is.null(quantiles) & !is.null(breaks.num)) {
+      stop("Either quantiles or breaks, not both")
+    }
+
+    if (!is.null(breaks.num)) {
+
+      str.by = by
+      quant.levels = NULL
+      str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")
+      quant.levels[1] = paste("<=", as.character(breaks.num)[1], sep = "")
+
+      for (i in 2:length(breaks.num)) {
+        str.by[which(by <= breaks.num[i] &
+                       by > breaks.num[i - 1])] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                                                      as.character(breaks.num[i], sep = "")))
+        quant.levels[i] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                              as.character(breaks.num[i], sep = "")))
+
+      }
+
+      str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+      quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+
+      by = factor(str.by, levels = quant.levels)
+      levels = levels(by)
+
+    } else {
+      if (!is.null(quantiles)) {
+        quantiles = as.numeric(quantiles)
+        quantiles[order(quantiles, decreasing = F)]
+      } else{
+        quantiles = c(0.25,0.5,0.75)
+      }
+
+      str.by = by
+      quant.levels = NULL
+
+      str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+      quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
+      for (i in 2:length(quantiles)) {
+        str.by[which(by <= quantile(by, quantiles[i]) &
+                       by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+                                                                                            1], sep = ""),
+                                                                     paste("Q", quantiles[i], sep = ""),
+                                                                     sep = "-")
+
+        quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
+      }
+      str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+      quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+      by = factor(str.by, levels = quant.levels)
+      levels = levels(by)
+
+    }
+  }
+
+
+  table = as.data.frame(unique(levels))
   names(table) = "levels"
 
   data = as.data.frame(data)
-  used = NULL
-  for (i in 1:(length(unique(by$levels))-1)) {
-    if(length(cols)>1){
-      col = data[,grep(table$levels[i], colnames(data[,cols]))]
-      rows = which(col == 1)
-      if(length(rows) == 0){
-        rows = which(rowMeans(data[,cols]) == 0)
-      }
-      subset = as.matrix(data[rows,])
-      pred = predict(model, subset)
-      target.sub = target[rows]
 
-    } else{
-      subset = data[which(data[, cols] == unique(by$levels)[i] ), ] #TL;DR: No dummy variable
-      pred = predict(model, subset)                                      # No adaptations for them
-      target.sub = target[which(data[, cols] == unique(by$levels)[i])]
-    }
+  used = NULL
+
+  for (i in 1:(length(unique(levels)))) {
+
+    subset = data[which(by == levels[i] ), ]
+    pred = predict(model, subset)
+    target.sub = target[which(by == levels[i] )]
+
 
     table$n[i] = length(pred)
+    table[i, "R^2"] = round(1 - (sum((pred - target.sub)^2)/sum((target.sub - mean(target.sub))^2)), 3)
+    if(table$`R^2`[i] < 0){
+      table$`R^2`[i] = 0
+    }
     table$RMSE[i] = round(sqrt(mean((target.sub - pred) ^ 2)), 3)
     table$real.mean[i] = round(mean(target.sub), 2)
     table$real.median[i] = round(stats::median(target.sub), 2)
@@ -479,31 +530,6 @@ RegViz = function(model = NULL,
     table$pred.median[i] = round(stats::median(pred), 2)
     table$pred.IQR[i] = round(stats::quantile(pred, 0.75) - stats::quantile(pred, 0.25), 2)
 
-    if(length(cols)>1){
-      used = c(used, rows)
-    }else{
-      used = c(used, which(data[, cols] == unique(by$levels)[i]))
-    }
-
-  }
-  if(length(used) != length(target)){
-    if(length(cols)>1){
-      subset = as.matrix(data[-used, ])
-    }else{
-      subset = data[-used, ]
-    }
-
-    pred = predict(model, subset)
-    target.sub = target[-used]
-
-    table$n[dim(table)[1]] = length(pred)
-    table$RMSE[dim(table)[1]] = round(sqrt(mean((target.sub - pred) ^ 2)), 3)
-    table$real.mean[dim(table)[1]] = round(mean(target.sub), 2)
-    table$real.median[dim(table)[1]] = round(stats::median(target.sub), 2)
-    table$real.IQR[dim(table)[1]] = round(stats::quantile(target.sub, 0.75) - stats::quantile(target.sub, 0.25), 2)
-    table$pred.mean[dim(table)[1]] = round(mean(pred), 2)
-    table$pred.median[dim(table)[1]] = round(stats::median(pred), 2)
-    table$pred.IQR[dim(table)[1]] = round(stats::quantile(pred, 0.75) - stats::quantile(pred, 0.25), 2)
   }
 
   if (map) {
@@ -524,7 +550,7 @@ RegViz = function(model = NULL,
     RealMean = base + tmap::tm_fill(col = "real.mean")
     PredMean = base + tmap::tm_fill(col = "pred.mean")
 
-    if (interactive) {
+    if (interactive.map) {
       n = tmap::tmap_leaflet(n)
       RMSEA = tmap::tmap_leaflet(RMSEA)
       RealMean = tmap::tmap_leaflet(RealMean)

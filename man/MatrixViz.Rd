@@ -22,7 +22,6 @@ Given a model, their target and independent variables, it separates a model's ob
 
 If the separating factor is spatial you can provide additional data to automatically plot summary statistics.
 The ability to separate results by a numeric variable's quantiles has been added.
-MCC has been temporarily removed due to it mostly just spewing out NAs during testing.
 }
 \arguments{
   \item{prediction}{
@@ -72,4 +71,41 @@ Only for non interactive plots - Should ask be turned on, aka, shoud plots wait 
   \item{interactive.map}{
 Should the map be converted to a leaflet(doesn't work with knitting for some reason, only on script or markdown, probably quarto too(untested))
   }
+}
+  \examples{
+
+library(nnet)
+library(AriMisc)
+
+data("iris")
+iris$Species = as.factor(iris$Species)
+
+test = multinom(Species ~., data = iris)
+
+summary(test)
+
+# Basic use case(more or less equivalent to caret::confusionMatrix)
+MatrixVis(prediction = predict(test, iris), target = iris$Species)
+
+# Separating by quartiles
+MatrixVis(model = test, target = iris$Species, data = iris,
+          by = iris$Sepal.Length,
+          ext.summary = T)
+
+# By costum quantiles
+MatrixVis(model = test, target = iris$Species, data = iris,
+          by = iris$Sepal.Width, quantiles = c(.1,.25,.5,.75,.9),
+          detailed = T)
+
+# By custom breaks
+hist(iris$Petal.Length)
+MatrixVis(model = test, target = iris$Species, data = iris,
+          by = iris$Petal.Length, breaks.num = c(2,4,6))
+
+# By levels of a factor
+hist(iris$Petal.Width)
+vector = ifelse(iris$Petal.Width < 1,"<1", ">=1")
+
+MatrixVis(model = test, target = iris$Species, data = iris, by = vector)
+
 }

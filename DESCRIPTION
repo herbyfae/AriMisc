@@ -1,7 +1,7 @@
 Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
-Version: 0.2.2
+Version: 0.3.1
 Author: Ari Chaves
 Maintainer: Ari Chaves <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
@@ -9,3 +9,4 @@ Depends: sf, tmap
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.2.2
