@@ -573,3 +573,181 @@ RegVis = function(model = NULL,
   }
 }
 
+
+Aggregate = function(data,
+                     by = NULL,
+                     quantiles = NULL,
+                     breaks.num = NULL,
+                     measures = "Core"
+) {
+
+  if (is.null(by)) {
+    stop("No by, where am I supposed to be aggregating from?")
+  }
+
+  if (length(by) == 1) {
+    by.name = as.character(by)
+    by = as.factor(data[, by.name])
+    data = data[,grep(paste('\\b', by.name, '\\b', sep = ""), names(data), invert = T)]
+  }
+  if (is.character(by)) {
+    by = as.factor(by)
+    levels = levels(by)
+  }
+  if (is.factor(by)) {
+    levels = levels(by)
+  }
+  if (is.numeric(by)) {
+    if (!is.null(quantiles) & !is.null(breaks.num)) {
+      stop("Either quantiles or breaks, not both")
+    }
+
+    if (!is.null(breaks.num)) {
+
+      str.by = by
+      quant.levels = NULL
+      str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")
+      quant.levels[1] = paste("<=", as.character(breaks.num)[1], sep = "")
+
+      if(length(breaks.num) > 1){
+      for (i in 2:length(breaks.num)) {
+        str.by[which(by <= breaks.num[i] &
+                       by > breaks.num[i - 1])] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                                                      as.character(breaks.num[i], sep = "")))
+        quant.levels[i] = gsub(" ", "", paste(as.character(breaks.num[i - 1]), "-",
+                                              as.character(breaks.num[i], sep = "")))
+
+      }
+      }
+
+      str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+      quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
+
+      by = factor(str.by, levels = quant.levels)
+      levels = levels(by)
+
+    } else {
+      if (!is.null(quantiles)) {
+        quantiles = as.numeric(quantiles)
+        quantiles[order(quantiles, decreasing = F)]
+
+        if(sum(quantiles < 0) > 0|sum(quantiles >100) > 0){
+          stop("Detected a number under 0 or over 100 in the by quantiles - Unable to convert to 0-1 quantiles")
+        } else if(sum(quantiles >= 1) > 0){
+          quantiles = quantiles/100
+        }
+
+      } else{
+        quantiles = c(0.25,0.5,0.75)
+      }
+
+      str.by = by
+      quant.levels = NULL
+
+      str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+      quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
+      for (i in 2:length(quantiles)) {
+        str.by[which(by <= quantile(by, quantiles[i]) &
+                       by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+                                                                                            1], sep = ""),
+                                                                     paste("Q", quantiles[i], sep = ""),
+                                                                     sep = "-")
+
+        quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
+      }
+      str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+      quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+      by = factor(str.by, levels = quant.levels)
+      levels = levels(by)
+
+    }
+  }
+
+  frame = as.data.frame(c(levels))
+  colnames(frame) = "levels"
+  names = colnames(data)
+
+  dim = length(levels)
+
+  measures = tolower(measures)
+  m.quantiles = as.numeric(measures[grep("[0-9]", measures)])
+
+  if(length(m.quantiles) == 0){
+    m.quantiles = NULL
+  } else if(sum(m.quantiles < 0) > 0|sum(m.quantiles >100) > 0){
+    stop("Detected a number under 0 or over 100 in the measures - Unable to convert to quantiles")
+  } else if(sum(m.quantiles >= 1) > 0){
+    m.quantiles = m.quantiles/100
+  }
+
+  for (i in 1:dim) {
+    subset = data[which(by == levels[i]),]
+    frame$count[i] = dim(subset)[1]
+
+    for (k in 1:length(names)) {
+      if (is.numeric(subset[, k])) {
+        if(sum(grepl("core", measures)) > 0){
+
+         if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+         frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
+         }
+
+         frame[i, paste(names[k], ".mean", sep = "")] = round(mean(subset[, k], na.rm = T), 2)
+         frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
+         frame[i, paste(names[k], ".25Q", sep = "")] = round(quantile(subset[, k], 0.25, na.rm = T), 2)
+         frame[i, paste(names[k], ".75Q", sep = "")] = round(quantile(subset[, k], 0.75, na.rm = T), 2)
+        }
+        if(sum(grepl("mean", measures)) > 0){
+         frame[i, paste(names[k], ".mean", sep = "")] = round(mean(subset[, k], na.rm = T), 2)
+        }
+        if(sum(grepl("median", measures)) > 0){
+         frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
+        }
+        if(length(m.quantiles)>0){
+        for(m in 1:length(m.quantiles)){
+          frame[i, paste(names[k], m.quantiles[m], sep = "")] = round(quantile(subset[, k], m.quantiles[m], na.rm = T), 2)
+        }
+        }
+        if(sum(grepl("iqr", measures)) > 0){
+          frame[i, paste(names[k], ".IQR", sep = "")] = round(quantile(subset[, k], 0.75, na.rm = T), 2) - round(quantile(subset[, k], 0.25, na.rm = T), 2)
+        }
+        if(sum(grepl("na", measures)) > 0){
+        frame[i, paste(names[k], ".NA", sep = "")] = round(sum(is.na(subset[, k])), 2)
+        }
+
+        } else if(length(table(data[,k])) == 2){
+
+          tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1])
+
+          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
+          frame[i, paste(names[k],tag , sep = ".%")] = round(sum((subset[, k] == as.character(tag)) /
+                                                                   dim(subset)[1]) * 100, 1)
+
+          if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+            frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
+          } else if(sum(grepl("na", measures)) > 0){
+            frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
+          }
+
+        } else{
+
+          tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1:3])
+
+          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
+
+          for(m in 1:3){
+            frame[i, paste(names[k],tag[m] , sep = ".%")] = round(sum((subset[, k] == as.character(tag[m])) /
+                                                                     dim(subset)[1]) * 100, 1)
+          }
+
+          if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+            frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
+          } else if(sum(grepl("na", measures)) > 0){
+            frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
+          }
+      }
+    }
+  }
+  return(frame)
+}
