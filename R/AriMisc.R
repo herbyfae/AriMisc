@@ -102,9 +102,16 @@ MatrixVis = function(prediction = NULL,
     }
     if (is.character(by)) {
       by = as.factor(by)
-      levels = levels(by)
     }
     if (is.factor(by)) {
+
+      if(sum(is.na(by))>0){
+        warning("Given by has NAs - converted to a separate subset")
+        by = as.character(by)
+        by[is.na(by)] = "NA"
+        by = as.factor(by)
+      }
+
       levels = levels(by)
     }
     if (is.numeric(by)) {
@@ -131,6 +138,12 @@ MatrixVis = function(prediction = NULL,
         str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
         quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
 
+        if(sum(is.na(by))>0){
+          warning("Given by has NAs - converted to a separate subset")
+          str.by[is.na(by)] = "NA"
+          quant.levels[(length(breaks.num) + 2)] = "NA"
+        }
+
         by = factor(str.by, levels = quant.levels)
         levels = levels(by)
 
@@ -145,19 +158,26 @@ MatrixVis = function(prediction = NULL,
         str.by = by
         quant.levels = NULL
 
-        str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+        str.by[which(by <= quantile(by, quantiles[1], na.rm  = T))] = paste("<=Q", quantiles[1], sep = "")
         quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
         for (i in 2:length(quantiles)) {
-          str.by[which(by <= quantile(by, quantiles[i]) &
-                         by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+          str.by[which(by <= quantile(by, quantiles[i], na.rm = T) &
+                         by > quantile(by, quantiles[i - 1], na.rm = T))] = paste(paste("Q", quantiles[i -
                                                                                               1], sep = ""),
                                                                        paste("Q", quantiles[i], sep = ""),
                                                                        sep = "-")
 
           quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
         }
-        str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+        str.by[which(by > quantile(by, quantiles[length(quantiles)], na.rm = T))] = paste(">Q", quantiles[length(quantiles)], sep = "")
         quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+        if(sum(is.na(by))>0){
+          warning("Given by has NAs - converted to a separate subset")
+          str.by[is.na(by)] = "NA"
+          quant.levels[(length(quantiles) + 2)] = "NA"
+        }
 
         by = factor(str.by, levels = quant.levels)
         levels = levels(by)
@@ -439,9 +459,16 @@ RegVis = function(model = NULL,
   }
   if (is.character(by)) {
     by = as.factor(by)
-    levels = levels(by)
   }
   if (is.factor(by)) {
+
+    if(sum(is.na(by))>0){
+      warning("Given by has NAs - converted to a separate subset")
+      by = as.character(by)
+      by[is.na(by)] = "NA"~
+      by = as.factor(by)
+    }
+
     levels = levels(by)
   }
   if (is.numeric(by)) {
@@ -468,6 +495,12 @@ RegVis = function(model = NULL,
       str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
       quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
 
+      if(sum(is.na(by))>0){
+        warning("Given by has NAs - converted to a separate subset")
+        str.by[is.na(by)] = "NA"
+        quant.levels[(length(breaks.num) + 2)] = "NA"
+      }
+
       by = factor(str.by, levels = quant.levels)
       levels = levels(by)
 
@@ -482,19 +515,25 @@ RegVis = function(model = NULL,
       str.by = by
       quant.levels = NULL
 
-      str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+      str.by[which(by <= quantile(by, quantiles[1], na.rm = T))] = paste("<=Q", quantiles[1], sep = "")
       quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
       for (i in 2:length(quantiles)) {
-        str.by[which(by <= quantile(by, quantiles[i]) &
-                       by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+        str.by[which(by <= quantile(by, quantiles[i], na.rm = T) &
+                       by > quantile(by, quantiles[i - 1], na.rm = T))] = paste(paste("Q", quantiles[i -
                                                                                             1], sep = ""),
                                                                      paste("Q", quantiles[i], sep = ""),
                                                                      sep = "-")
 
         quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
       }
-      str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+      str.by[which(by > quantile(by, quantiles[length(quantiles)], na.rm = T))] = paste(">Q", quantiles[length(quantiles)], sep = "")
       quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+      if(sum(is.na(by))>0){
+        warning("Given by has NAs - converted to a separate subset")
+        str.by[is.na(by)] = "NA"
+        quant.levels[(length(quantiles) + 2)] = "NA"
+      }
 
       by = factor(str.by, levels = quant.levels)
       levels = levels(by)
@@ -578,7 +617,7 @@ Aggregate = function(data,
                      by = NULL,
                      quantiles = NULL,
                      breaks.num = NULL,
-                     measures = "Core"
+                     measures = "core"
 ) {
 
   if (is.null(by)) {
@@ -592,10 +631,18 @@ Aggregate = function(data,
   }
   if (is.character(by)) {
     by = as.factor(by)
-    levels = levels(by)
   }
   if (is.factor(by)) {
-    levels = levels(by)
+
+   if(sum(is.na(by))>0){
+    warning("Given by has NAs - converted to a separate subset")
+    by = as.character(by)
+    by[is.na(by)] = "NA"
+    by = as.factor(by)
+   }
+
+   levels = levels(by)
+
   }
   if (is.numeric(by)) {
     if (!is.null(quantiles) & !is.null(breaks.num)) {
@@ -623,6 +670,12 @@ Aggregate = function(data,
       str.by[which(by > breaks.num[length(breaks.num)])] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
       quant.levels[(length(breaks.num) + 1)] = paste(">", as.character(breaks.num)[length(breaks.num)], sep = "")
 
+      if(sum(is.na(by))>0){
+        warning("Given by has NAs - converted to a separate subset")
+        str.by[is.na(by)] = "NA"
+        quant.levels[(length(breaks.num) + 2)] = "NA"
+      }
+
       by = factor(str.by, levels = quant.levels)
       levels = levels(by)
 
@@ -644,19 +697,28 @@ Aggregate = function(data,
       str.by = by
       quant.levels = NULL
 
-      str.by[which(by <= quantile(by, quantiles[1]))] = paste("<=Q", quantiles[1], sep = "")
+      str.by[which(by <= quantile(by, quantiles[1], na.rm = T))] = paste("<=Q", quantiles[1], sep = "", na.rm = T)
       quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
       for (i in 2:length(quantiles)) {
-        str.by[which(by <= quantile(by, quantiles[i]) &
-                       by > quantile(by, quantiles[i - 1]))] = paste(paste("Q", quantiles[i -
+        str.by[which(by <= quantile(by, quantiles[i], na.rm = T) &
+                       by > quantile(by, quantiles[i - 1], na.rm = T))] = paste(paste("Q", quantiles[i -
                                                                                             1], sep = ""),
                                                                      paste("Q", quantiles[i], sep = ""),
                                                                      sep = "-")
 
         quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
       }
-      str.by[which(by > quantile(by, quantiles[length(quantiles)]))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+      str.by[which(by > quantile(by, quantiles[length(quantiles)], na.rm = T))] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+
+
       quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+
+      if(sum(is.na(by))>0){
+        warning("Given by has NAs - converted to a separate subset")
+        str.by[is.na(by)] = "NA"
+        quant.levels[(length(quantiles) + 2)] = "NA"
+      }
 
       by = factor(str.by, levels = quant.levels)
       levels = levels(by)
@@ -671,7 +733,29 @@ Aggregate = function(data,
   dim = length(levels)
 
   measures = tolower(measures)
+
+  if(sum(grepl(paste('\\b', "cat", sep = ""), measures))>1){
+    stop("Include only one mention of the number of columns for categorical variables")
+  } else if(sum(grepl(paste('\\b', "cat", sep = ""), measures)) == 1){
+
+  cat.index = grep(paste('\\b', "cat", sep = ""), measures)
+
+  if(grepl("all", measures[cat.index])){
+    cat.k = "all"
+  } else{
+    cat.k = as.numeric(gsub("\\D", "", measures[cat.index]))
+  }
+
+  measures = measures[-cat.index]
+
+  } else{
+
+  cat.k = 3
+
+  }
+
   m.quantiles = as.numeric(measures[grep("[0-9]", measures)])
+
 
   if(length(m.quantiles) == 0){
     m.quantiles = NULL
@@ -686,10 +770,10 @@ Aggregate = function(data,
     frame$count[i] = dim(subset)[1]
 
     for (k in 1:length(names)) {
-      if (is.numeric(subset[, k])) {
+      if (is.numeric(subset[, k]) & length(table(data[,k])) > 2) {
         if(sum(grepl("core", measures)) > 0){
 
-         if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+         if(sum(is.na(data[,k]))>0 & (sum(grepl("\\bna\\b", measures)) == 0 | sum(grepl("relev_na", measures)) == 1)){
          frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
          }
 
@@ -712,38 +796,60 @@ Aggregate = function(data,
         if(sum(grepl("iqr", measures)) > 0){
           frame[i, paste(names[k], ".IQR", sep = "")] = round(quantile(subset[, k], 0.75, na.rm = T), 2) - round(quantile(subset[, k], 0.25, na.rm = T), 2)
         }
-        if(sum(grepl("na", measures)) > 0){
+        if(sum(grepl("\\bna\\b", measures)) > 0){
         frame[i, paste(names[k], ".NA", sep = "")] = round(sum(is.na(subset[, k])), 2)
         }
 
-        } else if(length(table(data[,k])) == 2){
+        } else if(length(table(data[,k])) == 2){  # Binary
 
           tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1])
 
+          if(sum(grepl("bin_mode", measures)) > 0){
           frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
+          }
+
           frame[i, paste(names[k],tag , sep = ".%")] = round(sum((subset[, k] == as.character(tag)) /
                                                                    dim(subset)[1]) * 100, 1)
 
-          if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+          if(sum(is.na(data[,k]))>0 & (sum(grepl("\\bna\\b", measures)) == 0 | sum(grepl("relev_na", measures)) == 1)){
             frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
-          } else if(sum(grepl("na", measures)) > 0){
+          } else if(sum(grepl("\\bna\\b", measures)) > 0){
             frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
           }
 
-        } else{
+        } else{ #Categorical/factors
 
-          tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1:3])
+          if(sum(grepl("\\bmode\\b", measures)) == 0)
 
           frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
 
-          for(m in 1:3){
+          if(is.numeric(cat.k)){
+           if(cat.k == 0){
+           }else{
+
+           tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1:cat.k])
+           tag = tag[!is.na(tag)]
+
+
+           for(m in 1:length(tag)){
+             frame[i, paste(names[k],tag[m] , sep = ".%")] = round(sum((subset[, k] == as.character(tag[m])) /
+                                                                         dim(subset)[1]) * 100, 1)
+           }
+
+          }} else if(cat.k == "all"){
+
+            tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)])
+
+            for(m in 1:length(names)){
             frame[i, paste(names[k],tag[m] , sep = ".%")] = round(sum((subset[, k] == as.character(tag[m])) /
                                                                      dim(subset)[1]) * 100, 1)
           }
+          }
 
-          if(sum(is.na(data[,k]))>0 & sum(grepl("na", measures)) == 0){
+
+          if(sum(is.na(data[,k]))>0 & (sum(grepl("\\bna\\b", measures)) == 0| sum(grepl("relev_na", measures)) == 1)){
             frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
-          } else if(sum(grepl("na", measures)) > 0){
+          } else if(sum(grepl("\\bna\\b", measures)) > 0){
             frame[i, paste(names[k], ".na", sep = "")] = round(sum(is.na(subset[, k])), 2)
           }
       }
@@ -751,3 +857,4 @@ Aggregate = function(data,
   }
   return(frame)
 }
+
