@@ -1,28 +1,42 @@
 missinglevel = function(factor1, factor2){
+
   tally = NULL; missing = NULL; missingcycle = NULL
 
-  factor1 = as.character(factor1); factor2 = as.character(factor2)
+  factor1 = as.factor(factor1); factor2 = as.factor(factor2)
+  levels = levels(factor1)
 
-  for(i in 1:length(factor1)){
-    str = 0
-    for(j in 1:length(factor2)){
-      if(factor1[i] == factor2[j]){
-        tally = c(tally, factor1[i])
-        str = 1
-      }
-    }
-    if(str == 0){
-      missing = c(missing, factor1[i])
-      missingcycle = c(missingcycle, i)
+  for(i in 1:length(levels)){
+
+    if(sum(factor2 == levels[i]) > 0){
+      tally = c(tally, levels[i])
+    } else {
+      missing = c(missing, levels[i])
+      missingcycle = c(missingcycle, which(factor1 == levels[i]))
     }
   }
 
-  missingfactor2 = which(is.na(factor(factor2, levels = unique(tally))))
+  missingfactor2 = which(is.na(factor(factor2, levels = tally)))
+  test = unique(as.character(factor2[missingfactor2]))
 
-  return(list("matching levels" = unique(tally),
-              "non-matching levels" = unique(missing),
+  missing = c(unique(missing), test)
+
+  tally = unique(tally)
+
+  if(is.null(tally)){
+    stop("No matches found, are you sure about what you introduced?")
+  }
+
+  if(length(tally) < length(unique(c(tally, missing)))/4){
+    warning("Less than 25% of possible levels were matched")
+  } else if(length(tally) < length(unique(c(tally, missing)))/2){
+    warning("Less than 50% of possible levels were matched")
+  }
+
+  return(list("matching levels" = tally,
+              "non-matching levels" = missing,
               "non-matching index1" = missingcycle,
-              "non-matching index2" = missingfactor2))
+              "non-matching index2" = missingfactor2)
+  )
 }
 
 
