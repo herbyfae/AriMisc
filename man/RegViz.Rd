@@ -30,7 +30,7 @@ True values of the predicted variable
 Set of predictor variables
   }
   \item{by}{
-Vector establishing separations for the data.
+Vector establishing separations for the data. Numeric ones will be automatically divided into quartiles(customizable via "quantiles" and "breaks.num"). Can have NAs, if it's not required for the model's predictions(They'll just form their own group).
   }
   \item{quantiles}{
 Through which quantiles should a numeric by be separated. Defaults to quartiles
@@ -52,7 +52,12 @@ Should the map be converted to a leaflet(doesn't work with knitting for some rea
   }
 }
   \examples{
+
 data("iris")
+
+iris$Species = as.factor(iris$Species)
+iris$Sepal.Width[c(1,10,59,70,120)] = NA
+
 test = lm(data = iris, Petal.Length ~ Sepal.Length)
 summary(test)
 
@@ -63,16 +68,17 @@ RegVis(data = iris, model = test, target = iris$Petal.Length)
 RegVis(data = iris, model = test, target = iris$Petal.Length, by = iris$Species)
 
 # Numeric by
- # Quantiles
+# Quantiles + by NA support
 RegVis(data = iris, model = test, target = iris$Petal.Length,
        by = iris$Sepal.Width)
 
 RegVis(data = iris, model = test, target = iris$Petal.Length,
-       by = iris$Sepal.Width, quantiles = c(0.1, 0.25,0.5,0.75,0.9))
+       by = iris$Sepal.Width,
+       quantiles = c(0.1,0.25,0.5,0.75, 0.9))
 
- # Specific breaks
+# Specific breaks(can be out of order)
 hist(iris$Sepal.Width)
 RegVis(data = iris, model = test, target = iris$Petal.Length,
-       by = iris$Sepal.Width, breaks.num = c(2.5, 3, 3.5))
+       by = iris$Sepal.Width, breaks.num = c(2.5, 3.5, 3))
 
   }

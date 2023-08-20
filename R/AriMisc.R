@@ -135,6 +135,7 @@ MatrixVis = function(prediction = NULL,
 
       if (!is.null(breaks.num)) {
 
+        breaks.num = breaks.num[order(breaks.num)]
         str.by = by
         quant.levels = NULL
         str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")
@@ -479,7 +480,7 @@ RegVis = function(model = NULL,
     if(sum(is.na(by))>0){
       warning("Given by has NAs - converted to a separate subset")
       by = as.character(by)
-      by[is.na(by)] = "NA"~
+      by[is.na(by)] = "NA"
       by = as.factor(by)
     }
 
@@ -492,6 +493,7 @@ RegVis = function(model = NULL,
 
     if (!is.null(breaks.num)) {
 
+      breaks.num = breaks.num[order(breaks.num)]
       str.by = by
       quant.levels = NULL
       str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")
@@ -665,6 +667,7 @@ Aggregate = function(data,
 
     if (!is.null(breaks.num)) {
 
+      breaks.num = breaks.num[order(breaks.num)]
       str.by = by
       quant.levels = NULL
       str.by[which(by <= breaks.num[1])] = paste("<=", as.character(breaks.num)[1], sep = "")

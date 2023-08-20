@@ -1,7 +1,7 @@
 Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
-Version: 0.5.3
+Version: 0.5.3.1
 Author: Ari Chaves
 Maintainer: Ari Chaves <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
