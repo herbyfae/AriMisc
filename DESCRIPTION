@@ -1,9 +1,9 @@
 Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
-Version: 0.6.0
-Author: Ari Chaves
-Maintainer: Ari Chaves <aritryout@gmail.com>
+Version: 0.6.1
+Author: Ari Rin
+Maintainer: Ari Rin <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
 Depends: sf, tmap
 License: GPL-3

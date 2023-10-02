@@ -7,11 +7,11 @@ Converting numerical columns to factors
 In the name really, just converts any given number of numerical columns/vectors to factors(all by the same breaks/quantiles though). Recycled code from breaking up numerical "by"s in aggregate and company. Still supports NAs.
 }
 \usage{
-NumToFact = function(data = NULL,
-                     num = NULL,
-                     quantiles = NULL,
-                     breaks = NULL,
-                     return.full = F)
+NumToFact(data = NULL,
+          num = NULL,
+          quantiles = NULL,
+          breaks = NULL,
+          return.full = F)
 }
 
 \arguments{
@@ -74,3 +74,6 @@ NumToFact(num = iris$Petal.Length, breaks = c(2,5))
 
 # Full return
 NumToFact(iris, return.full = T)
+
+NumToFact(iris, return.full = T, num = c(1,3))
+}

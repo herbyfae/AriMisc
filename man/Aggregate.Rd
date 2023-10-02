@@ -7,11 +7,11 @@ Aggregate with multiple basic summary statistics at once
 Given a factor to separate directly or a numeric vector to break up, returns summary measures for each column of each partition of the data. Added support for "by"s with NAs and options for categorical/factors and binary data.
 }
 \usage{
-Aggregate = function(data,
-                     by = NULL,
-                     quantiles = NULL,
-                     breaks.num = NULL,
-                     measures = "core"
+Aggregate(data,
+          by = NULL,
+          quantiles = NULL,
+          breaks.num = NULL,
+          measures = "core"
 )
 }
 
@@ -31,6 +31,7 @@ Same rationale, just giving it specific numbers.
 }
   \item{measures}{
 What summary statistics should be given.
+\bold{Capitalization isn't relevant, just here to make it easier to read}
 
 \cr
 
@@ -38,7 +39,7 @@ What summary statistics should be given.
 
 "core" computes the mean, quartiles, and, when present a tally of the column's NAs;
 
-"mean" and "median" can be given separately;
+"mean" and "median" can be given individually;
 
 "iqr" gives you the interquantile range;
 
@@ -52,15 +53,18 @@ Quantiles can be specified, just keep it consistent from 0-1 or 0-100(if there's
 
 \bold{Binary/string columns:}
 
-"cat_k" specifies a k number of a string variable's most common elements to be outputted(can be 0). Defaults to 3. "cat.all" prints every element of every column.
+"cat.k" specifies a k number of a string variable's most common elements to be outputted(can be 0). Defaults to 3. "cat.all" prints every element of every column.
 
-Mode is on by default for non binary categorical variables. For now anything with an isolated "mode" deactivates it, so use "mode.off" if its more intuitive(yes "." pass through "\\\b" checks, don't ask me why when "_" doesn't). For binary variables, it's off by default. "bin_mode" activates it if you need it for some reason.
+To this you could also add "_perBy", "_fromTotal" or "_rawQuant". "_perBy" is the default, displaying the percentages of each category per each level of by. "_fromTotal" computes the percentages of each category in the dataset per each level of by. So if a column is 33\% "a", and all of these are in a level of by, "_perBy" will give you 100\% on that level, while "_fromTotal" would give you 33\%. "_rawQuant" simply gives you the count.
+\bold{You don't need to set a k to set the type, eg. cat_fromTotal works}
+
+Mode is on by default for non binary categorical variables. For now anything with an isolated "mode" deactivates it, so use "mode.off" if its more intuitive(yes "." passes through "\\\b" checks, don't ask me why when "_" doesn't). For binary variables, it's off by default. "bin_mode" activates it if you need it for some reason.
 
 \cr
 
 \bold{Example:}
 
-measures = c("core", 0.1, 0.9, "na", "cat.5", "bin_mode") would give you the mean, 10,25,50,75 and 90\% quantiles for every numeric column. Binary columns would present the percentage of the most common option and the mode for each subset of the data. Factors/categorical variables would be limited to their 5 most common values along with their mode. NAs would be returned for every column
+measures = c("core", 0.1, 0.9, "na", "cat.5_rawQuant", "bin_mode") would give you the mean, 10,25,50,75 and 90\% quantiles for every numeric column. Binary columns would present the percentage of the most common option and the mode for each subset of the data. Factors/categorical variables would be limited to their 5 most common values, giving the counts of each, along with their mode. NAs would be returned for every column
 
 }
 }
@@ -77,13 +81,13 @@ summary(iris)
 Aggregate(iris, by = iris$Species, measures = "core")
 
 # Naming by and specifying measures
-Aggregate(iris, by = "Species", measures = c("median", 5, 25, 75, 95, "iqr"))
+Aggregate(iris, by = "Species", measures = c("median", 5, 95, "iqr"))
 
 # Default numeric by
 Aggregate(iris[,-1], by = iris$Sepal.Length, measures = c("median", "iqr", "relev_na"))
 
-# Messing with by's quantiles
-Aggregate(iris[,-2], by = iris$Sepal.Width, quantiles = c(.35,.65))
+# Messing with by's quantiles + fromTotal
+Aggregate(iris[,-2], by = iris$Sepal.Width, quantiles = c(.35,.65), measures = c("mean", "iqr", "cat_fromTotal"))
 
 # By a specific break + specific case of core + na forcing every column vs only when relevant
 hist(iris$Petal.Length)
@@ -109,7 +113,7 @@ Aggregate(iris[,-4], by = iris$Petal.Width, breaks.num = c(0.75), measures = c("
 # cat_k can only be set to one number. This acts as a maximum
 # (Any more than the available options for any column will simply be cut)
 
-### Exemple with multiple categories with different lengths
+### Example with multiple categories with different lengths
 
 set.seed(2)
 iris$cat1 = sample(c("test_1","test_2","test_3","test_4","test_5"), size = 150, replace = T)
@@ -125,4 +129,8 @@ Aggregate(iris[,-4], by = iris$Petal.Width, breaks.num = c(0.75),
 
 table(iris$cat2)[order(table(iris$cat2))]
 # As you can see these are the least common globally
+## Also visible by:
+
+Aggregate(iris[,-c(4:5)], by = iris$Petal.Width, breaks.num = c(0.75),
+          measures = c("cat.all_rawQuant"))
 }
