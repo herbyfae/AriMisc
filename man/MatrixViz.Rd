@@ -10,18 +10,12 @@ MatrixVis(prediction = NULL,
           quantiles = NULL,
           breaks.num = NULL,
           ext.summary = F,
-          detailed = F,
-          map = F,
-          map.data = NULL,
-          breaks = NULL,
-          ask = F,
-          interactive.map = F)
+          detailed = F)
 }
 \description{
 Given a model, their target and independent variables, it separates a model's observations by their level of a given factor, returning summary statistics for each of their levels. Alternatively one could just input the predictions from the beggining, to get a sligtly scuffed version of caret's confusionMatrix.
 
-If the separating factor is spatial you can provide additional data to automatically plot summary statistics.
-The ability to separate results by a numeric variable's quantiles has been added.
+\bold{Removed in-house mapping to limit package dependencies}. I recomend using sf::merge(make sure the column and strings all match) + tmap(just calling plot() or using ggplot also works, I just find tmap's functions easier to use for the results)
 }
 \arguments{
   \item{prediction}{
@@ -55,21 +49,6 @@ Adds the prevalence of each level of the target and the range of each fit measur
   }
   \item{detailed}{
 Should summary tables be returned for every level of a factor.
-  }
-  \item{map}{
-If by is spatial, would you like to plot the summary statistics
-  }
-  \item{map.data}{
-Required spatial data for plotting
-  }
-  \item{breaks}{
-Where would you like to separate the color gradients(for counts only(not many left honestly...))
-  }
-  \item{ask}{
-Only for non interactive plots - Should ask be turned on, aka, shoud plots wait until your input, or should they run all at once.
-  }
-  \item{interactive.map}{
-Should the map be converted to a leaflet(doesn't work with knitting for some reason, only on script or markdown, probably quarto too(untested))
   }
 }
   \examples{

@@ -7,16 +7,13 @@ RegVis(model = NULL,
        data = NULL,
        by = NULL,
        quantiles = NULL,
-       breaks.num = NULL,
-       map = F,
-       map.data = NULL,
-       interactive.map = F,
-       ask = T)
+       breaks.num = NULL
+       )
 }
 \description{
 Given a model, their target and independent variables, acts as a wrapper of predict to separate their input by a given factor's levels. Returns basic summary statistics for each level. Transplanted the by processing from MatrixViz(no longer supports getting a name for a group of dummies, just use the original column)
 
-If the separating factor is spatial you can provide additional data to automatically plot summary statistics.
+\bold{Removed in-house mapping to limit package dependencies}. I recomend using sf::merge(make sure the column and strings all match) + tmap(just calling plot() or using ggplot also works, I just find tmap's functions easier to use for the results)
 
 }
 \arguments{
@@ -37,18 +34,6 @@ Through which quantiles should a numeric by be separated. Defaults to quartiles
   }
   \item{breaks.num}{
 Vector of specific breaks for a numeric by.
-  }
-  \item{map}{
-If by is spatial, would you like to plot the summary statistics
-  }
-  \item{map.data}{
-Required spatial data for plotting
-  }
-  \item{ask}{
-Only for non interactive plots - Should ask be turned on
-  }
-  \item{interactive.map}{
-Should the map be converted to a leaflet(doesn't work with knitting for some reason)
   }
 }
   \examples{

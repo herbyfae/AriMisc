@@ -192,12 +192,7 @@ MatrixVis = function(prediction = NULL,
                      quantiles = NULL,
                      breaks.num = NULL,
                      ext.summary = F,
-                     detailed = F,
-                     map = F,
-                     map.data = NULL,
-                     breaks = NULL,
-                     ask = F,
-                     interactive.map = F) {
+                     detailed = F) {
 
   if (is.null(by)) {
     if(is.null(target)){
@@ -445,126 +440,6 @@ MatrixVis = function(prediction = NULL,
 
   }
 
-  if (map) {
-
-    graphics::par(ask = F)
-    if (ask) {
-      graphics::par(ask = T)
-    }
-
-    map.data = as.data.frame(map.data)
-
-    if (!is.null(by)) {
-
-      colnames(table.res)[1] = colnames(map.data)[1]
-      map.data = merge(table.res, map.data)
-      map.data = sf::st_as_sf(map.data)
-
-      base = tmap::tm_shape(map.data)
-      n = base + tmap::tm_fill(col = "n", breaks = breaks)
-      correctpredictions = base + tmap::tm_fill(col = "CorrectPredTotal", breaks = breaks)
-      incorrectpredictions = base + tmap::tm_fill(col = "IncorrectPredTotal", breaks = breaks)
-      recall = base + tmap::tm_fill(col = "MeanRecall")
-      precision = base + tmap::tm_fill(col = "MeanPrecision")
-      specificity = base + tmap::tm_fill(col = "MeanSpecificity")
-      F1 = base + tmap::tm_fill(col = "MeanF1")
-      BER = base + tmap::tm_fill(col = "BER")
-
-    } else{
-      colnames(table)[1] = colnames(map.data)[1]
-      map.data = merge(table, map.data, by = intersect(rownames(table), map.data[, 1]))
-      map.data = sf::st_as_sf(map.data)
-
-      base = tmap::tm_shape(map.data)
-
-      prevalence = base + tmap::tm_fill(col = "Prevalence")
-      totalpredictions = base + tmap::tm_fill(col = "TotalPred", breaks = breaks)
-      correctpredictions = base + tmap::tm_fill(col = "CorrectPred", breaks = breaks)
-      recall = base + tmap::tm_fill(col = "Recall")
-      precision = base + tmap::tm_fill(col = "Precision")
-      specificity = base + tmap::tm_fill(col = "Specificity")
-      accuracy = base + tmap::tm_fill(col = "Accuracy")
-      f1 = base + tmap::tm_fill(col = "F1")
-
-    }
-
-    if (interactive.map) {
-      if (is.null(by)) {
-        trueclass = tmap::tmap_leaflet(trueclass)
-        totalpredictions = tmap::tmap_leaflet(totalpredictions)
-        correctpredictions = tmap::tmap_leaflet(correctpredictions)
-        recall = tmap::tmap_leaflet(recall)
-        precision = tmap::tmap_leaflet(precision)
-        specificity = tmap::tmap_leaflet(specificity)
-        accuracy = tmap::tmap_leaflet(accuracy)
-        f1 = tmap::tmap_leaflet(f1)
-
-      } else{
-        n = tmap::tmap_leaflet(n)
-        correctpredictions = tmap::tmap_leaflet(correctpredictions)
-        incorrectpredictions = tmap::tmap_leaflet(incorrectpredictions)
-        recall = tmap::tmap_leaflet(recall)
-        precision = tmap::tmap_leaflet(precision)
-        specificity = tmap::tmap_leaflet(specificity)
-        F1 = tmap::tmap_leaflet(F1)
-        BER = tmap::tmap_leaflet(BER)
-      }
-    }
-    if (!is.null(by)) {
-      if (detailed) {
-        return(
-          list(
-            "Tablelist" = table.list,
-            "ShortTable" = table.res,
-            "MeanBER" = round(mean(table.res$BER), 3),
-            "plots" = list(
-              "n" = list(n),
-              "CorrectPredictions" = list(correctpredictions),
-              "IncorrectPredictions" = list(incorrectpredictions),
-              "MeanRecall" = list(recall),
-              "MeanPrecision" = list(precision),
-              "MeanSpecificity" = list(specificity),
-              "MeanF1" = list(F1),
-              "BER" = list(BER)
-            )
-          )
-        )
-      } else{
-        return(list(
-          "ShortTable" = table.res,
-          "MeanBER" = round(mean(table.res$BER), 3),
-          "plots" = list(
-            "n" = list(n),
-            "CorrectPredictions" = list(correctpredictions),
-            "IncorrectPredictions" = list(incorrectpredictions),
-            "MeanRecall" = list(recall),
-            "MeanPrecision" = list(precision),
-            "MeanSpecificity" = list(specificity),
-            "MeanF1" = list(F1),
-            "BER" = list(BER)
-          )
-        ))
-      }
-
-    } else{
-      return(list(
-        "table" = table,
-        "BER" = BER,
-        "plots" = list(
-          "TrueClass" = list(trueclass),
-          "TotalPredictions" = list(totalpredictions),
-          "CorrectPredictions" = list(correctpredictions),
-          "Recall" = list(recall),
-          "Precision" = list(precision),
-          "Specificity" = list(specificity),
-          "Accuracy" = list(accuracy),
-          "F1" = list(f1)
-        )
-      ))
-    }
-    graphics::par(ask = F)
-
-  }
   else{
     if (!is.null(by)) {
       if (detailed) {
@@ -592,11 +467,8 @@ RegVis = function(model = NULL,
                   data = NULL,
                   by = NULL,
                   quantiles = NULL,
-                  breaks.num = NULL,
-                  map = F,
-                  map.data = NULL,
-                  interactive.map = F,
-                  ask = T) {
+                  breaks.num = NULL
+) {
 
   if(is.null(model)){
     stop("What is this supposed to do without a model?")
@@ -729,42 +601,6 @@ RegVis = function(model = NULL,
     table$pred.median[i] = round(stats::median(pred), 2)
     table$pred.IQR[i] = round(stats::quantile(pred, 0.75) - stats::quantile(pred, 0.25), 2)
 
-  }
-
-  if (map) {
-
-    graphics::par(ask = F)
-    if (ask) {
-      graphics::par(ask = T)
-    }
-
-    map.data = as.data.frame(map.data)
-    colnames(table)[1] = colnames(map.data)[1]
-    map.data = merge(table, map.data)
-    map.data = sf::st_as_sf(map.data)
-
-    base = tmap::tm_shape(map.data)
-    n = base + tmap::tm_fill(col = "n")
-    RMSEA = base + tmap::tm_fill(col = "RMSE")
-    RealMean = base + tmap::tm_fill(col = "real.mean")
-    PredMean = base + tmap::tm_fill(col = "pred.mean")
-
-    if (interactive.map) {
-      n = tmap::tmap_leaflet(n)
-      RMSEA = tmap::tmap_leaflet(RMSEA)
-      RealMean = tmap::tmap_leaflet(RealMean)
-      PredMean = tmap::tmap_leaflet(PredMean)
-    }
-
-    return(list(
-      "table" = table,
-      "plots" = list(
-        "n" = n,
-        "RMSEA" = RMSEA,
-        "RealMean" = RealMean,
-        "PredMean" = PredMean
-      )
-    ))
   }
 
   else{
