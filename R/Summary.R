@@ -93,7 +93,7 @@ Summary = function(data,
 
       tag = names(table(data[, i])[order(table(data[, i]), decreasing = T)][1])
 
-      frame[paste("Bin" , sep = ".%"), i] = paste(tag , round(sum((data[, i] == as.character(tag)) /
+      frame["Bin.%", i] = paste(as.character(tag), round(sum((data[, i] == as.character(tag)) /
                                                                     dim(data)[1]
       ) * 100, 1), sep = ", ")
 
