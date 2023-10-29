@@ -1,6 +1,9 @@
 Summary = function(data,
                    measures = "core")
 {
+
+  data = as.data.frame(data)
+
   frame = data[0, 1:ncol(data)]
 
   names = colnames(data)
