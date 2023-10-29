@@ -440,7 +440,7 @@ MatrixVis = function(prediction = NULL,
 
   }
 
-  else{
+
     if (!is.null(by)) {
       if (detailed) {
         return(list(
@@ -458,7 +458,7 @@ MatrixVis = function(prediction = NULL,
     } else{
       return(list("table" = table, "BER" = BER))
     }
-  }
+
 }
 
 
@@ -603,9 +603,9 @@ RegVis = function(model = NULL,
 
   }
 
-  else{
+
     return(table)
-  }
+
 }
 
 

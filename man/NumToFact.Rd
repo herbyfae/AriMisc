@@ -5,6 +5,9 @@ Converting numerical columns to factors
 }
 \description{
 In the name really, just converts any given number of numerical columns/vectors to factors(all by the same breaks/quantiles though). Recycled code from breaking up numerical "by"s in aggregate and company. Still supports NAs.
+
+Doesn't seem to like special characters(WIP).
+
 }
 \usage{
 NumToFact(data = NULL,
