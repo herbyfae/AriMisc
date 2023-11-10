@@ -1,11 +1,11 @@
 Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
-Version: 0.7.1
+Version: 0.7.2.1
 Author: Ari Lea
 Maintainer: Ari Lea <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.2.2
