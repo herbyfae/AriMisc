@@ -814,7 +814,7 @@ Aggregate = function(data,
           frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k], useNA = "no")[order(table(subset[,k], useNA = "no"), decreasing = T)][1])
         }
 
-        frame[i, paste(names[k],tag , sep = ".%")] = round(sum((subset[, k] == as.character(tag)) /
+        frame[i, paste(names[k],tag , sep = ".%")] = round((sum(subset[, k] == as.character(tag), na.rm = T) /
                                                                  dim(subset)[1]) * 100, 1)
 
         if(sum(is.na(data[,k]))>0 & (sum(grepl("\\bna\\b", measures)) == 0 | sum(grepl("relev_na", measures)) == 1)){
