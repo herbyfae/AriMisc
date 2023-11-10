@@ -808,10 +808,10 @@ Aggregate = function(data,
 
       } else if(length(table(data[,k])) == 2){  # Binary
 
-        tag = names(table(data[,k])[order(table(data[,k]), decreasing = T)][1])
+        tag = names(table(data[,k], useNA = "no")[order(table(data[,k], useNA = "no"), decreasing = T)][1])
 
         if(sum(grepl("bin_mode", measures)) > 0){
-          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
+          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k], useNA = "no")[order(table(subset[,k], useNA = "no"), decreasing = T)][1])
         }
 
         frame[i, paste(names[k],tag , sep = ".%")] = round(sum((subset[, k] == as.character(tag)) /
@@ -827,7 +827,7 @@ Aggregate = function(data,
 
         if(sum(grepl("\\bmode\\b", measures)) == 0){
 
-          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k])[order(table(subset[,k]), decreasing = T)][1])
+          frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k], useNA = "no")[order(table(subset[,k], useNA = "no"), decreasing = T)][1])
         }
 
         if(is.numeric(cat.k)){

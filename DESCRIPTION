@@ -2,8 +2,8 @@ Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
 Version: 0.7.1
-Author: Ari Falin
-Maintainer: Ari Falin <aritryout@gmail.com>
+Author: Ari Lea
+Maintainer: Ari Lea <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
 License: GPL-3
 Encoding: UTF-8
