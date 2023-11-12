@@ -620,6 +620,8 @@ Aggregate = function(data,
     stop("No by, where am I supposed to be aggregating from?")
   }
 
+  data = as.data.frame(data)
+
   if (length(by) == 1) {
     by.name = as.character(by)
     by = data[, by.name]
