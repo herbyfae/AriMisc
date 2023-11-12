@@ -794,10 +794,16 @@ Aggregate = function(data,
         if(sum(grepl("median", measures)) > 0){
           frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
         }
+        if (sum(grepl("min", measures)) > 0 | sum(grepl("ext", measures)) > 0 ) {
+          frame[i, paste(names[k], ".min", sep = "")] = min(subset[, k], na.rm = T)
+        }
         if(length(m.quantiles)>0){
           for(m in 1:length(m.quantiles)){
             frame[i, paste(names[k], m.quantiles[m], sep = "")] = round(quantile(subset[, k], m.quantiles[m], na.rm = T), 2)
           }
+        }
+        if (sum(grepl("max", measures)) > 0 | sum(grepl("ext", measures)) > 0 ) {
+          frame[i, paste(names[k], ".max", sep = "")] = max(subset[, k], na.rm = T)
         }
         if(sum(grepl("iqr", measures)) > 0){
           frame[i, paste(names[k], ".IQR", sep = "")] = round(quantile(subset[, k], 0.75, na.rm = T), 2) - round(quantile(subset[, k], 0.25, na.rm = T), 2)

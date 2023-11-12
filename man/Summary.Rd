@@ -30,6 +30,8 @@ What summary statistics should be given.
 
 "iqr" gives you the interquantile range;
 
+"ext" gives you the extrema, "min" and "max" can be used seperatly too since it had to be divided anyways for looks.
+
 "na" forces every initial column to return a tally of their NAs(The rationale stays for character/factor columns);
 
 "relev_na" only prints NAs when the column actually has them(NA = 0 in that row, just a light optimization at most);

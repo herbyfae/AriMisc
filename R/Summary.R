@@ -62,8 +62,8 @@ Summary = function(data,
         }
 
         frame["Mean", i] = round(mean(data[, i], na.rm = T), 2)
-        frame["Median", i] = round(median(data[, i], na.rm = T), 2)
         frame["25Q", i] = round(quantile(data[, i], 0.25, na.rm = T), 2)
+        frame["Median", i] = round(median(data[, i], na.rm = T), 2)
         frame[".75Q", i] = round(quantile(data[, i], 0.75, na.rm = T), 2)
       }
 
@@ -73,10 +73,16 @@ Summary = function(data,
       if (sum(grepl("median", measures)) > 0) {
         frame["Median", i] = round(median(data[, i], na.rm = T), 2)
       }
+      if (sum(grepl("min", measures)) > 0 | sum(grepl("ext", measures)) > 0 ) {
+        frame["Min", i] = min(data[, i], na.rm = T)
+      }
       if (length(m.quantiles) > 0) {
         for (m in 1:length(m.quantiles)) {
           frame[as.character(m.quantiles[m]), i] = round(quantile(data[, i], m.quantiles[m], na.rm = T), 2)
         }
+      }
+      if (sum(grepl("max", measures)) > 0 | sum(grepl("ext", measures)) > 0 ) {
+        frame["Max", i] = max(data[, i], na.rm = T)
       }
       if (sum(grepl("iqr", measures)) > 0) {
         frame["IQR", i] = round(quantile(data[, i], 0.75, na.rm = T), 2) - round(quantile(data[, i], 0.25, na.rm = T), 2)

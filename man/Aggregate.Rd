@@ -11,7 +11,9 @@ Aggregate(data,
           by = NULL,
           quantiles = NULL,
           breaks.num = NULL,
-          measures = "core"
+          measures = "core",
+          multicat = NULL,
+          multicat.perIndiv = T
 )
 }
 
@@ -43,6 +45,8 @@ What summary statistics should be given.
 
 "iqr" gives you the interquantile range;
 
+"ext" gives you the extrema, "min" and "max" can be used seperatly too since it had to be divided anyways for looks.
+
 "na" forces every initial column to return a tally of their NAs(The rationale stays for character/factor columns);
 
 "relev_na" only prints NAs when the column actually has them;
@@ -67,6 +71,24 @@ Mode is on by default for non binary categorical variables. For now anything wit
 measures = c("core", 0.1, 0.9, "na", "cat.5_rawQuant", "bin_mode") would give you the mean, 10,25,50,75 and 90\% quantiles for every numeric column. Binary columns would present the percentage of the most common option and the mode for each subset of the data. Factors/categorical variables would be limited to their 5 most common values, giving the counts of each, along with their mode. NAs would be returned for every column
 
 }
+\item{multistr}{
+
+\bold{Spoilers}
+
+specific options for columns with multiple strings per cell. Obeys categorical settings(to be changeable in the future). Can be introduced two ways:
+
+\cr
+
+If the split is always the same(every string in every relevant column is always separated by "_" for example), you can just enter c(index or colnames, separation).
+
+If different columns have different splits, please enter a list with the same format, eg. list(c(3,"_"), c(2,4, ","), c(3,6, "\\<BR\\>"))
+
+Separators should be in Regex(\link{https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html}
+}
+\item{multicat.perIndiv}{
+Should the tally be divided by the number of individuals or the number of total strings. Defaults to true. Doesn't affect _rawQuant. Specific to the others eg. divided by the total number of strings in the subset or globally.
+}
+
 }
 
 \examples{
