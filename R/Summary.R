@@ -89,7 +89,7 @@ Summary = function(data,
       }
 
 
-    } else if (length(table(data[, i])) == 2) {
+    } else if (length(table(data[, i])) <= 2) {
       # Binary
 
       frame[, i] = as.character(frame[,i])

@@ -806,7 +806,7 @@ Aggregate = function(data,
           frame[i, paste(names[k], ".NA", sep = "")] = round(sum(is.na(subset[, k])), 2)
         }
 
-      } else if(length(table(data[,k])) == 2){  # Binary
+      } else if(length(table(data[,k])) <= 2){  # Binary
 
         tag = names(table(data[,k], useNA = "no")[order(table(data[,k], useNA = "no"), decreasing = T)][1])
 
