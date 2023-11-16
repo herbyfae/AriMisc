@@ -14,6 +14,7 @@ NumToFact(data = NULL,
           num = NULL,
           quantiles = NULL,
           breaks = NULL,
+          break.names = NULL,
           return.full = F)
 }
 
@@ -33,6 +34,9 @@ Quantiles with which to subset the vectors/columns. Defaults to quartiles if not
 }
   \item{breaks}{
 Same idea, concrete numbers instead.
+}
+  \item{break.names}{
+Custom names for each new level. Length = length(breaks or quantiles) + 1(NA level is generated automatically when relevant). Accepts duplicate names.
 }
   \item{return.full}{
 Tries to put everything back in place and return the data just with the decided upon numericals turned to factors.
@@ -67,16 +71,23 @@ NumToFact(num = "Sepal.Length")
 # Forcing a factor by indexation
 NumToFact(data = iris, num = c(2,6))
 
-# Custom quantiles
-NumToFact(num = iris[,c(1,2)], quantiles = c(0.1,0.5,0.9))
+# Custom quantiles and names
+
+NumToFact(num = iris[,c(1,2)], quantiles = c(0.05,0.95),
+          break.names = c("Outlier", "Normal", "Outlier"))
 
 # Custom breaks
 
 hist(iris$Petal.Length)
-NumToFact(num = iris$Petal.Length, breaks = c(2,5))
+NumToFact(num = iris$Petal.Length, breaks = c(2,5), break.names = c("S", "M", "L"))
+
+# Error if break names length is different from length(breaks or quantiles) + 1
+
+NumToFact(num = iris$Petal.Length, breaks = c(2,5), break.names = c("S", "L"))
 
 # Full return
 NumToFact(iris, return.full = T)
 
 NumToFact(iris, return.full = T, num = c(1,3))
+
 }

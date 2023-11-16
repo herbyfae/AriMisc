@@ -43,6 +43,7 @@ NumToFact = function(data = NULL,
                      num = NULL,
                      quantiles = NULL,
                      breaks = NULL,
+                     break.names = NULL,
                      return.full = F) {
 
   if (!is.null(quantiles) & !is.null(breaks)) {
@@ -99,22 +100,36 @@ NumToFact = function(data = NULL,
     for(j in 1:cols){
 
       str.num = num[j]
-      quant.levels = NULL
-      quant.levels[1] = paste("<=", as.character(breaks)[1], sep = "")
+
+      if(!is.null(break.names)){
+        if(length(break.names) != (length(breaks) + 1)){
+          stop("There should be one name for each new level(length of breaks + 1)")
+        }
+        quant.levels = break.names
+      } else{
+        quant.levels = NULL
+        quant.levels[1] = paste("<=", as.character(breaks)[1], sep = "")
+      }
+
       str.num[which(num[j] <= breaks[1]),1] = quant.levels[1]
 
       if(length(breaks) > 1){
         for (i in 2:length(breaks)) {
 
+          if(is.null(break.names)){
           quant.levels[i] = gsub(" ", "", paste(as.character(breaks[i - 1]), "-",
                                                 as.character(breaks[i], sep = "")))
+          }
           str.num[which(num[j] <= breaks[i] &
                           num[j] > breaks[i - 1]),1] = quant.levels[i]
 
         }
       }
 
+      if(is.null(break.names)){
       quant.levels[(length(breaks) + 1)] = paste(">", as.character(breaks)[length(breaks)], sep = "")
+      }
+
       str.num[which(num[j] > breaks[length(breaks)]),1] = quant.levels[(length(breaks) + 1)]
 
       if(sum(is.na(num[j]))>0){
@@ -123,7 +138,7 @@ NumToFact = function(data = NULL,
         quant.levels[(length(breaks) + 2)] = "NA"
       }
 
-      num[j] = factor(str.num[,1], levels = quant.levels)
+      num[j] = factor(str.num[,1], levels = unique(quant.levels))
     }
   } else {
     if (!is.null(quantiles)) {
@@ -146,22 +161,37 @@ NumToFact = function(data = NULL,
     for(j in 1:cols){
 
       str.num = num[j]
-      quant.levels = NULL
 
-      quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
+
+      if(!is.null(break.names)){
+        if(length(break.names) != (length(quantiles) + 1)){
+          stop("There should be one name for each new level(length of quantiles + 1)")
+        }
+        quant.levels = break.names
+      } else{
+        quant.levels = NULL
+        quant.levels[1] = paste("<=Q", quantiles[1], sep = "")
+      }
+
       str.num[which(num[j] <= quantile(num[j], quantiles[1], na.rm = T)),1] = quant.levels[1]
 
       for (i in 2:length(quantiles)) {
 
-        quant.levels[i] =  paste(paste("Q", quantiles[i-1], sep = ""), paste("Q", quantiles[i], sep = ""), sep = "-")
+        if (is.null(break.names)) {
+          quant.levels[i] =  paste(paste("Q", quantiles[i - 1], sep = ""),
+                                   paste("Q", quantiles[i], sep = ""),
+                                   sep = "-")
 
-
+        }
         str.num[which(num[j] <= quantile(num[j], quantiles[i], na.rm = T) &
                         num[j] > quantile(num[j], quantiles[i - 1], na.rm = T)),1] = quant.levels[i]
 
       }
 
+      if (is.null(break.names)) {
       quant.levels[(length(quantiles) + 1)] = paste(">Q", quantiles[length(quantiles)], sep = "")
+      }
+
       str.num[which(num[j] > quantile(num[j], quantiles[length(quantiles)], na.rm = T)),1] = quant.levels[(length(quantiles) + 1)]
 
       if(sum(is.na(num[j]))>0){
@@ -170,7 +200,8 @@ NumToFact = function(data = NULL,
         quant.levels[(length(quantiles) + 2)] = "NA"
       }
 
-      num[j] = factor(str.num[,1], levels = quant.levels)
+      num[j] = factor(str.num[,1], levels = unique(quant.levels))
+
     }
   }
 
