@@ -39,9 +39,11 @@ What summary statistics should be given.
 
 \bold{Numeric columns:}
 
-"core" computes the mean, quartiles, and, when present a tally of the column's NAs;
+"core" computes the mean, sd, quartiles, and, when present a tally of the column's NAs;
 
 "mean" and "median" can be given individually;
+
+"sd", "var" and "mad" give you the standard deviation, variance and median absolute deviation respectively;
 
 "iqr" gives you the interquantile range;
 

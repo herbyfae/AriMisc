@@ -817,12 +817,22 @@ Aggregate = function(data,
           }
 
           frame[i, paste(names[k], ".mean", sep = "")] = round(mean(subset[, k], na.rm = T), 2)
-          frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
+          frame[i, paste(names[k], ".sd", sep = "")] = round(sd(subset[, k], na.rm = T), 3)
           frame[i, paste(names[k], ".25Q", sep = "")] = round(quantile(subset[, k], 0.25, na.rm = T), 2)
+          frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
           frame[i, paste(names[k], ".75Q", sep = "")] = round(quantile(subset[, k], 0.75, na.rm = T), 2)
         }
         if(sum(grepl("mean", measures)) > 0){
           frame[i, paste(names[k], ".mean", sep = "")] = round(mean(subset[, k], na.rm = T), 2)
+        }
+        if(sum(grepl("sd", measures)) > 0){
+          frame[i, paste(names[k], ".sd", sep = "")] = round(sd(subset[, k], na.rm = T), 3)
+        }
+        if(sum(grepl("var", measures)) > 0){
+          frame[i, paste(names[k], ".var", sep = "")] = round(var(subset[, k], na.rm = T), 3)
+        }
+        if(sum(grepl("mad", measures)) > 0){
+          frame[i, paste(names[k], ".mad", sep = "")] = round(mad(subset[, k], na.rm = T), 3)
         }
         if(sum(grepl("median", measures)) > 0){
           frame[i, paste(names[k], ".median", sep = "")] = round(median(subset[, k], na.rm = T), 2)
