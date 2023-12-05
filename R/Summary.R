@@ -10,7 +10,7 @@ Summary = function(data,
 
   measures = tolower(measures)
 
-  cat.type = "rawquant"
+  cat.type = "quant"
   cat.i = 3
 
   if (sum(grepl("\\bcat", measures)) > 1) {
@@ -112,9 +112,13 @@ Summary = function(data,
 
       tag = names(table(data[, i])[order(table(data[, i]), decreasing = T)][1])
 
-      frame["Bin.%", i] = paste(as.character(tag), round((sum(data[, i] == as.character(tag), na.rm = T) /
+      if(sum(grepl("bin_count", measures))){
+        frame["Bin", i] = paste(as.character(tag), sum(data[, i] == as.character(tag), na.rm = T), sep = ", ")
+      } else{
+        frame["Bin.%", i] = paste(as.character(tag), round((sum(data[, i] == as.character(tag), na.rm = T) /
                                                                     dim(data)[1]
       ) * 100, 1), sep = ", ")
+      }
 
       if (sum(is.na(data[, i])) > 0) {
         frame["NA", i] = sum(is.na(data[, i]))
@@ -137,7 +141,7 @@ Summary = function(data,
           for (m in 1:length(tag)) {
 
 
-            if (cat.type == "rawquant") {
+            if (cat.type == "quant") {
               frame[paste("Cat", m, sep = ""), i] = paste(as.character(tag[m]), sum(data[, i] == as.character(tag[m]), na.rm = T), sep = ", ")
 
             }
@@ -154,7 +158,7 @@ Summary = function(data,
         tag = names(table(data[, i], useNA = "no")[order(table(data[, i], useNA = "no"), decreasing = T)])
 
         for (m in 1:length(tag)) {
-          if (cat.type == "rawquant") {
+          if (cat.type == "quant") {
             frame[paste("Cat", m, sep = ""), i] = paste(as.character(tag[m]), sum(data[, i] == as.character(tag[m]), na.rm = T), sep = ", ")
           }
           if (cat.type == "fromtotal") {

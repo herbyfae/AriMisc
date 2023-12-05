@@ -46,10 +46,12 @@ Quantiles can be specified, just keep it consistent from 0-1 or 0-100(if there's
 
 "cat.k" specifies a k number of a string variable's most common elements to be outputted(can be 0). Defaults to 3. "cat.all" prints every element of every column.
 
-To this you could also add "_fromTotal" or "_rawQuant". "_rawQuant" is the default, giving you the count. "_fromTotal" computes the percentages of each category in the dataset.
+To this you could also add "_fromTotal" or "_Quant". "_Quant" is the default, giving you the count. "_fromTotal" computes the percentages of each category in the dataset.
 \bold{You don't need to set a k to set the type, eg. cat_fromTotal works}
 
 Mode has been removed, cells will always display the relevant name and percentage/count.
+
+Binary variables can be shown in counts via "Bin_Count".
 
 \cr
 
