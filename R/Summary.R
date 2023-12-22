@@ -110,9 +110,17 @@ Summary = function(data,
 
       frame[, i] = as.character(frame[,i])
 
-      tag = names(table(data[, i])[order(table(data[, i]), decreasing = T)][1])
+      if(sum(grepl("bin_refhigh", measures)) > 0){
+        data[, i] = as.factor(data[, i])
+        tag = levels(data[, i])[2]
+      } else if(sum(grepl("bin_reflow", measures)) > 0){
+        data[, i] = as.factor(data[, i])
+        tag = levels(data[, i])[1]
+      } else{
+        tag = names(table(data[, i])[order(table(data[, i]), decreasing = T)][1])
+      }
 
-      if(sum(grepl("bin_count", measures))){
+      if(sum(grepl("bin_count", measures)) > 0){
         frame["Bin", i] = paste(as.character(tag), sum(data[, i] == as.character(tag), na.rm = T), sep = ", ")
       } else{
         frame["Bin.%", i] = paste(as.character(tag), round((sum(data[, i] == as.character(tag), na.rm = T) /

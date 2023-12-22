@@ -1,7 +1,7 @@
 Package: AriMisc
 Type: Package
 Title: Miscellaneous vizualization functions
-Version: 0.7.5
+Version: 0.7.6
 Author: Ari Lea
 Maintainer: Ari Lea <aritryout@gmail.com>
 Description: Miscellaneous visualization functions.
