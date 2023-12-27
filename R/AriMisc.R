@@ -857,7 +857,15 @@ Aggregate = function(data,
 
       } else if(length(table(data[,k])) <= 2){  # Binary
 
-        tag = names(table(data[,k], useNA = "no")[order(table(data[,k], useNA = "no"), decreasing = T)][1])
+        if(sum(grepl("bin_refhigh", measures)) > 0){
+          data[, k] = as.factor(data[, k])
+          tag = levels(data[, k])[2]
+        } else if(sum(grepl("bin_reflow", measures)) > 0){
+          data[, k] = as.factor(data[, k])
+          tag = levels(data[, k])[1]
+        } else{
+          tag = names(table(data[, k])[order(table(data[, k]), decreasing = T)][1])
+        }
 
         if(sum(grepl("bin_mode", measures)) > 0){
           frame[i, paste(names[k], "mode", sep = ".")] = names(table(subset[,k], useNA = "no")[order(table(subset[,k], useNA = "no"), decreasing = T)][1])

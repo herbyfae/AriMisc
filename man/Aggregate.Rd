@@ -66,6 +66,8 @@ To this you could also add "_perBy", "_fromTotal" or "_rawQuant". "_perBy" is th
 
 Mode is on by default for non binary categorical variables. For now anything with an isolated "mode" deactivates it, so use "mode.off" if its more intuitive(yes "." passes through "\\\b" checks, don't ask me why when "_" doesn't). For binary variables, it's off by default. "bin_mode" activates it if you need it for some reason.
 
+Added the option to lock binary variable display to the highest or lowest level: "bin_refhigh" and "bin_reflow".
+
 \cr
 
 \bold{Example:}
