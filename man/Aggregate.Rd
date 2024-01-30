@@ -4,7 +4,7 @@
 Aggregate with multiple basic summary statistics at once
 }
 \description{
-Given a factor to separate directly or a numeric vector to break up, returns summary measures for each column of each partition of the data. Added support for "by"s with NAs and options for categorical/factors and binary data.
+Given a factor to separate directly or a numeric vector to break up, returns summary measures for each column of each partition of the data. Added support for "by"s with NAs and options for categorical/factors and binary data. Finally got multistring options functional, if a bit finicky if using regex.
 }
 \usage{
 Aggregate(data,
@@ -78,7 +78,7 @@ measures = c("core", 0.1, 0.9, "na", "cat.5_rawQuant", "bin_mode") would give yo
 
 Separate set of settings for any string column that you want to give a division to. In no particular order you need to give the function 3 things:
 
-The column in question, index only(of the given data -> data[,3:5] -\> selecting column 4 would be done with 2). You can give multiple per set, but they can't overlap. You can duplicate the column in question to give it different settings if necessary.
+The column in question, index only(of the given data -> data[,3:5] -> selecting column 4 would be done with 2). You can give multiple per set, but they can't overlap. You can duplicate the column in question to give it different settings if necessary.
 
 The separation in question. Can be as simple as a comma or as messy as regex. You can provide multiple for the same column, they'll be interpreted as "example|example|example".
 
@@ -86,7 +86,7 @@ Finally, whether you want to get the count or the percentage of the strings in t
 
 This can be presented as one vector or as a list of settings if you want to use different ones for multiple columns. So, for example, multistr = c(2, ",", "all_perc") would give you the percentage of all substrings divided by commas in the second column. This will be the percentage of items present in the subset of by.
 
-list(c(1:4, ",", "_", "5_count"), c(6, "[\\(\\)]", "all_perc")) would give you the count of the 5 most prevalent substrings in the first four columns separated by commas or "_"s. Additionally, column 6 would effectively remove "()"s, eg a(b) would be returned as "a" and "b". All substrings would be shown, with their percentages.
+list(c(1:4, ",", "_", "5_count"), c(6, "[\\\(\\\)]", "all_perc")) would give you the count of the 5 most prevalent substrings in the first four columns separated by commas or "_"s. Additionally, column 6 would effectively remove "()"s, eg a(b) would be returned as "a" and "b". All substrings would be shown, with their percentages.
 
 }
 
