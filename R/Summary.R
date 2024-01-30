@@ -47,8 +47,6 @@ Summary = function(data,
     m.quantiles = m.quantiles / 100
   }
 
-  # Restructure
-
 
   for (i in 1:ncol(data)) {
     # Numeric
@@ -110,10 +108,10 @@ Summary = function(data,
 
       frame[, i] = as.character(frame[,i])
 
-      if(sum(grepl("bin_refhigh", measures)) > 0){
+      if(sum(grepl("refhigh", measures)) > 0){
         data[, i] = as.factor(data[, i])
         tag = levels(data[, i])[2]
-      } else if(sum(grepl("bin_reflow", measures)) > 0){
+      } else if(sum(grepl("reflow", measures)) > 0){
         data[, i] = as.factor(data[, i])
         tag = levels(data[, i])[1]
       } else{
@@ -190,5 +188,5 @@ Summary = function(data,
     }
 
   }
-  return(frame)
+  return(t(frame))
 }

@@ -51,7 +51,7 @@ To this you could also add "_fromTotal" or "_Quant". "_Quant" is the default, gi
 
 Mode has been removed, cells will always display the relevant name and percentage/count.
 
-Binary variables can be shown in counts via "Bin_Count". You can also lock it so that it shows the highest or lowest level of the factor instead of the most prominent -> "bin_refhigh" and "bin_reflow".
+Binary variables can be shown in counts via "Bin_Count". You can also lock it so that it shows the highest or lowest level of the factor instead of the most prominent -> "RefHigh" and "RefLow"(no capitalization needed).
 
 \cr
 
@@ -91,8 +91,8 @@ iris$bin = sample(c(0,1), prob = c(0.7, 0.3), size = 150, replace = T)
 # (as a workaround, anything with only two values is interpreted as binary, numeric or not)
 
 # To specify a level to consistently extract
-Summary(iris[,-c(1:4)], measures = c("bin_refhigh"))
-Summary(iris[,-c(1:4)], measures = c("bin_reflow"))
+Summary(iris[,-c(1:4)], measures = c("refhigh"))
+Summary(iris[,-c(1:4)], measures = c("reflow"))
 
 ## Absolute minimum extractable
 Summary(iris, measures = "cat.0")
