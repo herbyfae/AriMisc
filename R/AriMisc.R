@@ -1182,6 +1182,6 @@ Aggregate = function(data,
       }
     }
   }
-  return(frame)
+  return(as.data.frame(frame))
 }
 

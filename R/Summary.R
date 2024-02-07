@@ -188,5 +188,5 @@ Summary = function(data,
     }
 
   }
-  return(t(frame))
+  return(as.data.frame(t(as.data.frame(frame))))
 }
