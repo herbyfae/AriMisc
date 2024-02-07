@@ -11,9 +11,7 @@ Aggregate_old(data,
           by = NULL,
           quantiles = NULL,
           breaks.num = NULL,
-          measures = "core",
-          multicat = NULL,
-          multicat.perIndiv = T
+          measures = "core"
 )
 }
 
