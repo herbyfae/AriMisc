@@ -2,3 +2,7 @@
 
 importFrom(AER,dispersiontest)
 importFrom(MASS,glm.nb)
+importFrom(stats, "glm", "mad", "median", "poisson", "predict",
+               "quantile", "quasipoisson", "sd", "var")
+
+exportPattern("^[[:alpha:]]+")

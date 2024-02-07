@@ -9,7 +9,7 @@ Given a dependent variable and a dataset of factors it applies a normal or Quasi
 Factors are nested for visibility, using the default as a reference(1st level against the rest) along with their count, mean and sd for a visual check.
 }
 \usage{
-Poisson = function(data = NULL, dependent = NULL)
+Poisson(data = NULL, dependent = NULL)
 }
 \arguments{
   \item{data}{

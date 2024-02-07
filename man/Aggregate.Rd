@@ -191,13 +191,13 @@ Aggregate(iris[, 8:9],
  # simple and not too varied
 
 # eg:
-trimws(strsplit("p <BR> O", "<\\<BR\\>>")[[1]])
-trimws(strsplit("a(b)", "[\\(\\)]")[[1]])
+trimws(strsplit("p <BR> O", "<\\\\<BR\\\\>>")[[1]])
+trimws(strsplit("a(b)", "[\\\\(\\\\)]")[[1]])
 trimws(strsplit("r[31]", "[]|[<>]")[[1]]) # Got this one by accident
 
 # If I join them all, it looks fine here
  # Outside of the spaces but that's dealt with with a for loop
-strsplit(c("a(b)", "r[31]", "p <BR> O"), "[]|[<>]|[\\(\\)]|<\\<BR\\>>")
+strsplit(c("a(b)", "r[31]", "p <BR> O"), "[]|[<>]|[\\\\(\\\\)]|<\\\\<BR\\\\>>")
 
 # Give it to the function and BR appears
  # Kinda weird considering I just applied the exact same separation
@@ -206,7 +206,7 @@ Aggregate(
   cbind(iris$stress2, iris$stress2, iris$stress2),
   by = as.factor(iris$bin),
   measures = "cat_count",
-  multistr = list(c("[]", "[<>]", "[\\(\\)]", "<\\<BR\\>>" , 2, "all_count"),
+  multistr = list(c("[]", "[<>]", "[\\\\(\\\\)]", "<\\\\<BR\\\\>>" , 2, "all_count"),
                   c("[]|[<>]", 3, "all_count"))
 )
 
@@ -218,6 +218,6 @@ Aggregate(
   measures = c("cat_count", "core"),
   multistr = list(c("_", 7:8, "3_count"),
                   c(9, "_", ",", ";", "a", ":", "all_count"),
-                  c("[]", "[<>]", "[\\(\\)]", "<\\<BR\\>>" , 10, "all_count"))
+                  c("[]", "[<>]", "[\\\\(\\\\)]", "<\\\\<BR\\\\>>" , 10, "all_count"))
 )
 }
