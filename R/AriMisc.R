@@ -992,7 +992,7 @@ Aggregate = function(data,
         } else{
           frame[buffer_temp, k + 2] = round((sum(
             subset == as.character(tag), na.rm = T
-          ) / length(subset)) * 100, 2)
+          ) / length(subset[!is.na(subset)])) * 100, 2)
           frame[buffer_temp, 2] = paste(as.character(tag), "%", sep = "")
           buffer_temp = buffer_temp + 1
         }

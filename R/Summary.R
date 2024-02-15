@@ -122,7 +122,7 @@ Summary = function(data,
         frame["Bin", i] = paste(as.character(tag), sum(data[, i] == as.character(tag), na.rm = T), sep = ", ")
       } else{
         frame["Bin.%", i] = paste(as.character(tag), round((sum(data[, i] == as.character(tag), na.rm = T) /
-                                                                    dim(data)[1]
+                                                                    length(data[!is.na(data[,i]),i])
       ) * 100, 1), sep = ", ")
       }
 
