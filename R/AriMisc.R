@@ -932,7 +932,7 @@ Aggregate = function(data,
           buffer_temp = buffer_temp + 1
         }
         if (sum(grepl("range", num_measures)) > 0) {
-          frame[buffer_temp, k + 2] = paste(round(min(subset, na.rm = T), 2), round(max(subset, na.rm = T), 2), paste = " - ")
+          frame[buffer_temp, k + 2] = paste(round(min(subset, na.rm = T), 2), round(max(subset, na.rm = T), 2), sep = " - ")
           frame[buffer_temp, 2] = "Range"
           buffer_temp = buffer_temp + 1
         }
