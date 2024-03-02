@@ -10,12 +10,20 @@ MatrixVis(prediction = NULL,
           quantiles = NULL,
           breaks.num = NULL,
           ext.summary = F,
-          detailed = F)
+          detailed = F,
+          map.data = NULL,
+          breaks = NULL,
+          ask = F)
 }
 \description{
 Given a model, their target and independent variables, it separates a model's observations by their level of a given factor, returning summary statistics for each of their levels. Alternatively one could just input the predictions from the beggining, to get a sligtly scuffed version of caret's confusionMatrix.
 
-\bold{Removed in-house mapping to limit package dependencies}. I recomend using sf::merge(make sure the column and strings all match) + tmap(just calling plot() or using ggplot also works, I just find tmap's functions easier to use for the results)
+\bold{Probably for a limited time only, reinstated automatic mapping capabilities. Still recomended to do them manually}
+
+From my limited experience, I recomend using sf::merge(make sure the column and strings all match) + tmap(just calling plot() or using ggplot also works, I just find tmap's functions easier to use for the results)
+
+
+
 }
 \arguments{
   \item{prediction}{
@@ -49,6 +57,15 @@ Adds the prevalence of each level of the target and the range of each fit measur
   }
   \item{detailed}{
 Should summary tables be returned for every level of a factor.
+  }
+  \item{map.data}{
+Required spatial data for spatial plots.
+  }
+  \item{breaks}{
+Where would you like to separate the color gradients(for counts only(not many left honestly...))
+  }
+  \item{ask}{
+Should ask be turned on, aka, shoud plots wait until your input, or should they run all at once.
   }
 }
   \examples{

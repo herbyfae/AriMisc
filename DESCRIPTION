@@ -1,12 +1,18 @@
-Package: AriMisc
 Type: Package
+Package: AriMisc
 Title: Miscellaneous vizualization functions
-Version: 0.8.2.3
+Version: 0.8.3
 Author: Ari Lea
 Maintainer: Ari Lea <aritryout@gmail.com>
-Description: Compilation of functions created by someone too lazy to look for if they already exist.
-Imports: AER, MASS
+Description: Compilation of functions created by someone too lazy to look
+    for if they already exist.
 License: GPL-3
+Imports: 
+    AER,
+    MASS,
+    sf,
+    sp,
+    tmap
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3

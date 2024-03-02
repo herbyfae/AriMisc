@@ -2,7 +2,9 @@
 
 importFrom(AER,dispersiontest)
 importFrom(MASS,glm.nb)
-importFrom(stats, "glm", "mad", "median", "poisson", "predict",
-               "quantile", "quasipoisson", "sd", "var")
+importFrom(sp,merge)
+importFrom(sf,st_as_sf)
+importFrom(tmap,tm_fill)
+importFrom(tmap,tm_shape)
 
 exportPattern("^[[:alpha:]]+")
