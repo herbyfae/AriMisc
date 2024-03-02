@@ -18,8 +18,6 @@ missinglevel = function(factor1, factor2){
   missingfactor2 = which(is.na(factor(factor2, levels = tally)))
   test = unique(as.character(factor2[missingfactor2]))
 
-  missing = c(unique(missing), test)
-
   tally = unique(tally)
 
   if(is.null(tally)){
@@ -33,7 +31,8 @@ missinglevel = function(factor1, factor2){
   }
 
   return(list("matching levels" = tally,
-              "non-matching levels" = missing,
+              "non-matching1" = unique(missing),
+              "non-matching2" = test,
               "non-matching index1" = missingcycle,
               "non-matching index2" = missingfactor2)
   )
