@@ -33,18 +33,18 @@ MatrixVis = function(prediction = NULL,
 
       itr.table[1, 1] = sum(View[which(View$Class == pos &
                                          View$Prediction == pos), 3]) # True pos
-      itr.table[1, 2] = sum(View[which(View$Class == pos &
+      itr.table[2, 1] = sum(View[which(View$Class == pos &
                                          View$Prediction != pos), 3]) # False neg
-      itr.table[2, 1] = sum(View[which(View$Class != pos &
+      itr.table[1, 2] = sum(View[which(View$Class != pos &
                                          View$Prediction == pos), 3]) # False pos
       itr.table[2, 2] = sum(View[which(View$Class != pos &
                                          View$Prediction != pos), 3]) # True neg
 
-      TotalPred = sum(itr.table[, 1])
-      TrueClass = sum(itr.table[1, ])
+      TotalPred = sum(itr.table[1, ])
+      TrueClass = sum(itr.table[, 1])
       Prevalence = round(TrueClass / length(target), 3)
 
-      Specificity = round(itr.table[2, 2] / sum(itr.table[2, ]), 3)
+      Specificity = round(itr.table[2, 2] / sum(itr.table[,2]), 3)
       Recall = ifelse(TrueClass > 0, round(itr.table[1, 1] / TrueClass, 3), NA)
       Precision = ifelse(TotalPred > 0, round(itr.table[1, 1] / TotalPred, 3), NA)
       F1 = ifelse(Recall > 0 |
@@ -55,6 +55,7 @@ MatrixVis = function(prediction = NULL,
       table$CorrectPred[i] = itr.table[1, 1]
       table$FalseNeg[i] = itr.table[1, 2]
       table$FalsePos[i] = itr.table[2, 1]
+      table$TrueNeg[i] = itr.table[2, 2]
       table$Prevalence[i] = Prevalence
       table$TotalPred[i] = TotalPred
       table$Accuracy[i] = Accuracy
@@ -181,18 +182,18 @@ MatrixVis = function(prediction = NULL,
 
         itr.table[1, 1] = sum(View[which(View$Class == pos &
                                            View$Prediction == pos), 3]) # True pos
-        itr.table[1, 2] = sum(View[which(View$Class == pos &
+        itr.table[2, 1] = sum(View[which(View$Class == pos &
                                            View$Prediction != pos), 3]) # False neg
-        itr.table[2, 1] = sum(View[which(View$Class != pos &
+        itr.table[1, 2] = sum(View[which(View$Class != pos &
                                            View$Prediction == pos), 3]) # False pos
         itr.table[2, 2] = sum(View[which(View$Class != pos &
                                            View$Prediction != pos), 3]) # True neg
 
-        TotalPred = sum(itr.table[, 1])
-        TrueClass = sum(itr.table[1, ])
+        TotalPred = sum(itr.table[1, ])
+        TrueClass = sum(itr.table[, 1])
         Prevalence = round(TrueClass / length(target.sub), 3)
 
-        Specificity = round(itr.table[2, 2] / sum(itr.table[2, ]), 3)
+        Specificity = round(itr.table[2, 2] / sum(itr.table[, 2]), 3)
         Recall = ifelse(TrueClass > 0, round(itr.table[1, 1] / TrueClass, 3), NA)
         Precision = ifelse(TotalPred > 0, round(itr.table[1, 1] / TotalPred, 3), NA)
         F1 = ifelse(Recall > 0 |
@@ -203,6 +204,7 @@ MatrixVis = function(prediction = NULL,
         table.sub$CorrectPred[i] = itr.table[1, 1]
         table.sub$FalseNeg[i] = itr.table[1, 2]
         table.sub$FalsePos[i] = itr.table[2, 1]
+        table.sub$TrueNeg[i] = itr.table[2, 2]
         table.sub$Prevalence[i] = Prevalence
         table.sub$TotalPred[i] = TotalPred
         table.sub$Accuracy[i] = Accuracy
