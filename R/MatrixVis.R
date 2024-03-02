@@ -50,15 +50,15 @@ MatrixVis = function(prediction = NULL,
       F1 = ifelse(Recall > 0 |
                     Precision > 0, round((2 * Recall * Precision) / (Recall + Precision), 3), NA)
       Accuracy = round((itr.table[1, 1] + itr.table[2, 2]) / length(target), 3)
-
+      BalAccuracy = round((Recall+Specificity)/2, 3)
 
       table$CorrectPred[i] = itr.table[1, 1]
-      table$FalseNeg[i] = itr.table[1, 2]
-      table$FalsePos[i] = itr.table[2, 1]
-      table$TrueNeg[i] = itr.table[2, 2]
+      table$FalsePos[i] = itr.table[1, 2]
+      table$FalseNeg[i] = itr.table[2, 1]
       table$Prevalence[i] = Prevalence
       table$TotalPred[i] = TotalPred
       table$Accuracy[i] = Accuracy
+      table$BalAccuracy[i] = BalAccuracy
       table$Specificity[i] = Specificity
       table$Recall[i] = Recall
       table$Precision[i] = Precision
@@ -199,15 +199,15 @@ MatrixVis = function(prediction = NULL,
         F1 = ifelse(Recall > 0 |
                       Precision > 0, round((2 * Recall * Precision) / (Recall + Precision), 3), NA)
         Accuracy = round((itr.table[1, 1] + itr.table[2, 2]) / sum(sum(itr.table[1, ]), sum(itr.table[2, ])), 3)
-
+        BalAccuracy = round((Recall+Specificity)/2, 3)
 
         table.sub$CorrectPred[i] = itr.table[1, 1]
-        table.sub$FalseNeg[i] = itr.table[1, 2]
-        table.sub$FalsePos[i] = itr.table[2, 1]
-        table.sub$TrueNeg[i] = itr.table[2, 2]
+        table.sub$FalsePos[i] = itr.table[1, 2]
+        table.sub$FalseNeg[i] = itr.table[2, 1]
         table.sub$Prevalence[i] = Prevalence
         table.sub$TotalPred[i] = TotalPred
         table.sub$Accuracy[i] = Accuracy
+        table.sub$BalAccuracy[i] = BalAccuracy
         table.sub$Specificity[i] = Specificity
         table.sub$Recall[i] = Recall
         table.sub$Precision[i] = Precision

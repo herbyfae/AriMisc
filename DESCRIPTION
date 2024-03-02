@@ -1,7 +1,7 @@
 Type: Package
 Package: AriMisc
 Title: Miscellaneous vizualization functions
-Version: 0.8.3.1
+Version: 0.8.3.2
 Author: Ari Lea
 Maintainer: Ari Lea <aritryout@gmail.com>
 Description: Compilation of functions created by someone too lazy to look

@@ -84,6 +84,8 @@ summary(test)
 
 # Basic use case(more or less equivalent to caret::confusionMatrix)
 MatrixVis(prediction = predict(test, iris), target = iris$Species)
+table(prediction = predict(test, iris), target = iris$Species)
+
 
 # Separating by quartiles
 MatrixVis(model = test, target = iris$Species, data = iris,
