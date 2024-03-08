@@ -376,6 +376,7 @@ Aggregate = function(data,
   }
 
   data = as.data.frame(data)
+  skip = F
 
   if (length(by) == 1) {
     if (is.character(by)) {
@@ -390,12 +391,24 @@ Aggregate = function(data,
     data = data[, grep(paste('\\b', by.name, '\\b', sep = ""), names(data), invert = T)]
   }
   if (is.character(by)) {
-    by = as.factor(by)
+    if(sum(is.na(suppressWarnings(as.numeric(by))) & !is.na(by)) == 0){
+      if(sum(is.na(by)) > 0){
+        by[is.na(by)] = "NA"
+        by = factor(by, levels = c(unique(by[order(as.numeric(by))])))
+        warning("Given by has NAs - converted to a separate subset")
+      } else{
+        by = factor(by, levels = unique(by[order(as.numeric(by))]))
+      }
+      skip = T
+
+    }else{
+      by = as.factor(by)
+    }
   }
 
   if (is.factor(by)) {
 
-    if(sum(is.na(by))>0){
+    if(sum(is.na(by))>0 & skip == F){
       warning("Given by has NAs - converted to a separate subset")
       by = as.character(by)
       by[is.na(by)] = "NA"
