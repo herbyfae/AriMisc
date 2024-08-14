@@ -1,5 +1,5 @@
-# Repository for all the random stuff I never bothered to look up if it already existed
-### Currently home to 5 decent functions and 2 examples of peak brainrot
+# Museum/Lab for all the things I was too lazy to look up
+### Currently home to 4 decent functions and 2 examples of peak brainrot
 
 **Summary** pretty much only restructures the base summary to give you a little more control. Just an uglier version of tbl_summary with the option to cap the number of categories displayed;
 
