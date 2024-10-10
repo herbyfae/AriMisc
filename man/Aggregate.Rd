@@ -1,10 +1,10 @@
 \name{Aggregate}
 \alias{Aggregate}
 \title{
-Aggregate with multiple basic summary statistics at once
+Comically robust aggregate stats for initial visualization
 }
 \description{
-Given a factor to separate directly or a numeric vector to break up, returns summary measures for each column of each partition of the data. Added support for "by"s with NAs and options for categorical/factors and binary data. Finally got multistring options functional, if a bit finicky if using regex.
+Given a factor to separate directly or a numeric vector to break up, returns summary measures for each column of each partition of the data. Given "by"s can be given in any reasonable-ish format(see options below). Multistring cells can be processed internally, though giving multiple regex can lead to wonky results.
 }
 \usage{
 Aggregate(data,
@@ -22,6 +22,8 @@ Pretty self explanatory. Unless you call "by" by name, exclude the vector from h
 }
   \item{by}{
 Vector to separate the data with. Factors/character vectors don't require anything else, numeric ones do. Can have NAs, these will simply form a separate subset.
+
+Can be completely external as long as it has the same size("0"/"NULL"/"NA" gives you just the summary stats).
 }
   \item{quantiles}{
 Quantiles used to separate a numeric by. Defaults to quartiles.
@@ -60,18 +62,19 @@ Quantiles can be specified, just keep it consistent from 0-1 or 0-100(if there's
 
 "cat.k" specifies a k number of a string variable's most common elements to be outputted(can be 0). Defaults to 3. "cat.all" prints every element of every column.
 
-To this you could also add "_perBy", "_fromTotal" or "_rawQuant". "_perBy" is the default, displaying the percentages of each category per each level of by. "_fromTotal" computes the percentages of each category in the dataset per each level of by. So if a column is 33\% "a", and all of these are in a level of by, "_perBy" will give you 100\% on that level, while "_fromTotal" would give you 33\%. "_rawQuant" simply gives you the count.
+To this you could also add "_perLine" or "_count".
+
 \bold{You don't need to set a k to set the type, eg. cat_fromTotal works}
 
 Mode can be turned on via "mode" in either measures or multistr.
 
-Added the option to lock binary variable display to the highest or lowest level: "bin_refhigh" and "bin_reflow".
+Added the option to lock binary variable display to the highest or lowest level: "bin_refHigh" and "bin_refLow".
 
 \cr
 
 \bold{Basic example:}
 
-measures = c("core", 0.1, 0.9, "na", "cat.5_rawQuant", "bin_mode") would give you the mean, 10,25,50,75 and 90\% quantiles for every numeric column. Binary columns would present the percentage of the most common option and the mode for each subset of the data. Factors/categorical variables would be limited to their 5 most common values, giving the counts of each, along with their mode. NAs would be returned for every column
+measures = c("core", 0.1, 0.9, "na", "cat.5_count", "bin_mode") would give you the mean, 10,25,50,75 and 90\% quantiles for every numeric column. Binary columns would present the percentage of the most common option and the mode for each subset of the data. Factors/categorical variables would be limited to their 5 most common values, giving the counts of each, along with their mode. NAs would be returned for every column
 
 }
   \item{multistr}{

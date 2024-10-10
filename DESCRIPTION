@@ -2,13 +2,14 @@ Type: Package
 Package: AriMisc
 Title: Miscellaneous vizualization functions
 Version: 0.8.3.3
-Author: Ari Lea
-Maintainer: Ari Lea <aritryout@gmail.com>
-Description: Compilation of functions created by someone too lazy to look
+Author: Ari Lea Fae
+Maintainer: Ari Lea Fae <aritryout@gmail.com>
+Description: Compilation of early visualization tools created by someone too lazy to look
     for if they already exist.
 License: GPL-3
 Imports: 
     AER,
+    lubridate,
     MASS,
     sf,
     sp,
@@ -16,3 +17,6 @@ Imports:
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
