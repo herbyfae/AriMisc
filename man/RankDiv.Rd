@@ -6,7 +6,7 @@ Ordering by size of its elements and cutting any column into a factor.
 \description{
 
 Converts any given number of columns/vectors to factors(all by the same ranks/quantiles though).
-An easier experiment on the bones of RankDiv on how to implement this feature in Aggregate that might be useful in general.
+An easier experiment on the bones of NumToFact on how to implement this feature in Aggregate that might be useful in general.
 
 }
 \usage{
