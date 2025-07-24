@@ -24,9 +24,12 @@ my time experimenting with PBI;
 Eventually but low priority:
 
 - Adding a formal testing backend.
+- Adding a shiny demonstration.
 
 
 # Museum/Lab for all the things that seemed kind of like good ideas at the time
+
+Usable via **devtools::install_github("herbyfae/AriMisc")**.
 
 **Summary** pretty much only restructures the base summary to give you a little more control. 
 Just an uglier version of tbl_summary with the option to cap the number of categories displayed;
