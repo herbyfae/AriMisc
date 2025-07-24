@@ -1,11 +1,10 @@
 Type: Package
 Package: AriMisc
 Title: Miscellaneous vizualization functions
-Version: 0.8.3.3
-Author: Ari Lea Fae
-Maintainer: Ari Lea Fae <aritryout@gmail.com>
-Description: Compilation of early visualization tools created by someone too lazy to look
-    for if they already exist.
+Version: 0.8.4
+Author: Ari
+Maintainer: Ari <aritryout@gmail.com>
+Description: Compilation of early visualization and summarization tools
 License: GPL-3
 Imports: 
     AER,
